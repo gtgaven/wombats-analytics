@@ -29,7 +29,7 @@ class Game:
                 if (row[0] not in absent_players):
                     raise RuntimeError(f'{row[0]} is not in the roster or appears twice in the stats')
                 absent_players.remove(row[0])
-                self.player_stats[row[0]] = PlayerStats(int(row[1]), int(row[2]), int(row[3]), int(row[4]), int(row[5]), int(row[6]), int(row[7]), int(row[8]), int(row[9]))
+                self.player_stats[row[0]] = PlayerStats(1, int(row[1]), int(row[2]), int(row[3]), int(row[4]), int(row[5]), int(row[6]), int(row[7]), int(row[8]), int(row[9]))
 
             if len(absent_players) != (len(self.roster) - self.player_count):
                 raise RuntimeError(f'mismatch between absent players and player count')

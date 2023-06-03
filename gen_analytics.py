@@ -13,8 +13,12 @@ def main():
             json_config = json.load(config)
 
         season = SeasonStats(json_config)
-        season.export_non_cumulative_stats_pretty("non_cumulative_stats.csv")
-        season.export_cumulative_stats_pretty("cumulative_stats.csv")
+        season.export_non_cumulative_stats_pretty("non_cumulative.csv")
+        season.export_cumulative_stats_pretty("cumulative.csv")
+        season.export_raw_non_cumulative_data("raw_non_cumulative.csv")
+        season.export_raw_cumulative_data("raw_cumulative.csv")
+        print(f'Files exported to ./output/{s}/')
+
 
 if __name__ == "__main__":
     main()
