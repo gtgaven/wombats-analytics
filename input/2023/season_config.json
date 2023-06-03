@@ -1,0 +1,44 @@
+{
+    "version": "1.0.0",
+    "team": "West Building Wombats",
+    "year": 2023,
+    "roster": [
+        "Alex",
+        "Brandon",
+        "Cam",
+        "Carol",
+        "Chad",
+        "Greg",
+        "Hunter",
+        "Ian",
+        "Josh",
+        "Luke",
+        "Moises",
+        "Nate Lo",
+        "Nate Ly",
+        "Paul",
+        "Phil",
+        "Ryan",
+        "Shane",
+        "Steve",
+        "Ted",
+        "Zach"
+    ],
+    "games": [
+        {
+            "was_home": false,
+            "op": "Cryo-Havoc",
+            "op_score": 14,
+            "score": 3,
+            "player_count": 13
+        },
+        {
+            "was_home": true,
+            "op": "Cryo-Havoc",
+            "op_score": 9,
+            "score": 11,
+            "player_count": 13
+        } 
+    ]
+
+}
