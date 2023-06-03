@@ -1,0 +1,125 @@
+{
+    "version": "1.0.0",
+    "team": "West Building Wombats",
+    "year": 2022,
+    "roster": [
+        "Brandon",
+        "Carol",
+        "Chad",
+        "Greg",
+        "Hunter",
+        "Ian",
+        "Josh",
+        "Lance",
+        "Luke",
+        "Matthew",
+        "Nate",
+        "Phil",
+        "Ryan",
+        "Shane",
+        "Ted",
+        "Walt",
+        "Zach"
+    ],
+    "games": [
+        {
+            "was_home": true,
+            "op": "PIPELine",
+            "op_score": 3,
+            "score": 18,
+            "player_count": 14
+        },
+        {
+            "was_home": false,
+            "op": "PIPELine",
+            "op_score": 6,
+            "score": 18,
+            "player_count": 14
+        },
+        {
+            "was_home": false,
+            "op": "Tailgators",
+            "op_score": 3,
+            "score": 11,
+            "player_count": 11
+        },
+        {
+            "was_home": true,
+            "op": "Tailgators",
+            "op_score": 18,
+            "score": 9,
+            "player_count": 11
+        },
+        {
+            "was_home": true,
+            "op": "QN Deez",
+            "op_score": 26,
+            "score": 4,
+            "player_count": 11
+        },
+        {
+            "was_home": false,
+            "op": "QN Deez",
+            "op_score": 14,
+            "score": 3,
+            "player_count": 11
+        },
+        {
+            "was_home": false,
+            "op": "Quit Your Pitching",
+            "op_score": 19,
+            "score": 13,
+            "player_count": 10
+        },
+        {
+            "was_home": true,
+            "op": "Quit Your Pitching",
+            "op_score": 11,
+            "score": 12,
+            "player_count": 10
+        },
+        {
+            "was_home": false,
+            "op": "PIPELine",
+            "op_score": 6,
+            "score": 10,
+            "player_count": 12
+        },
+        {
+            "was_home": true,
+            "op": "PIPELine",
+            "op_score": 5,
+            "score": 15,
+            "player_count": 12
+        },
+        {
+            "was_home": true,
+            "op": "game 11 UNKNOWN - TODO",
+            "op_score": 25,
+            "score": 4,
+            "player_count": 10
+        },
+        {
+            "was_home": false,
+            "op": "game 12 UNKNOWN - TODO",
+            "op_score": 25,
+            "score": 10,
+            "player_count": 10
+        },
+        {
+            "was_home": false,
+            "op": "game 13 UNKNOWN - TODO",
+            "op_score": 20,
+            "score": 5,
+            "player_count": 9
+        },
+        {
+            "was_home": true,
+            "op": "game 14 UNKNOWN - TODO",
+            "op_score": 25,
+            "score": 5,
+            "player_count": 9
+        }
+    ]
+
+}
