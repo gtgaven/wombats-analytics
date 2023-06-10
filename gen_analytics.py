@@ -1,11 +1,9 @@
 import sys
 import json
-from pathlib import Path
 
-from Game import Game
 from Season import SeasonStats
 
-SEASONS_TO_REGEN = ['2022', '2023']
+SEASONS_TO_REGEN = ['2021', '2022', '2023']
 
 def main():
     for s in SEASONS_TO_REGEN:

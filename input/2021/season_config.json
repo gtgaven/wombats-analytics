@@ -1,0 +1,109 @@
+{
+    "version": "1.0.0",
+    "team": "West Building Wombats",
+    "year": 2021,
+    "roster": [
+        "Anna",
+        "Brad",
+        "Brandon",
+        "Carol",
+        "Greg",
+        "Isaac",
+        "Jake",
+        "Jamila",
+        "Katie",
+        "Lance",
+        "Nate La",
+        "Phil",
+        "Ruthie",
+        "Ryan",
+        "Ted",
+        "Walt"
+    ],
+    "games": [
+        {
+            "was_home": true,
+            "op": "UNKNOWN TBD",
+            "op_score": 19,
+            "score": 7,
+            "player_count": 11
+        },
+        {
+            "was_home": false,
+            "op": "UNKNOWN TBD",
+            "op_score": 18,
+            "score": 11,
+            "player_count": 11
+        },
+        {
+            "was_home": false,
+            "op": "UNKNOWN TBD",
+            "op_score": 16,
+            "score": 5,
+            "player_count": 11
+        },
+        {
+            "was_home": true,
+            "op": "UNKNOWN TBD",
+            "op_score": 6,
+            "score": 17,
+            "player_count": 11
+        },
+        {
+            "was_home": false,
+            "op": "UNKNOWN TBD",
+            "op_score": 18,
+            "score": 11,
+            "player_count": 13
+        },
+        {
+            "was_home": true,
+            "op": "UNKNOWN TBD",
+            "op_score": 19,
+            "score": 8,
+            "player_count": 13
+        },
+        {
+            "was_home": true,
+            "op": "UNKNOWN TBD",
+            "op_score": 19,
+            "score": 5,
+            "player_count": 12
+        },
+        {
+            "was_home": false,
+            "op": "UNKNOWN TBD",
+            "op_score": 17,
+            "score": 5,
+            "player_count": 12
+        },
+        {
+            "was_home": false,
+            "op": "UNKNOWN TBD",
+            "op_score": 12,
+            "score": 10,
+            "player_count": 9
+        },
+        {
+            "was_home": true,
+            "op": "UNKNOWN TBD",
+            "op_score": 3,
+            "score": 4,
+            "player_count": 9
+        },
+        {
+            "was_home": true,
+            "op": "UNKNOWN TBD",
+            "op_score": 10,
+            "score": 15,
+            "player_count": 9
+        },
+        {
+            "was_home": false,
+            "op": "UNKNOWN TBD",
+            "op_score": 8,
+            "score": 10,
+            "player_count": 9
+        }
+    ]
+}
