@@ -146,11 +146,11 @@ class SeasonStats:
         export_path = f'output/{self.cfg["year"]}/{output_file_name}'
         Path(os.path.dirname(export_path)).mkdir(parents=True, exist_ok=True)
         with open(export_path, "w") as out_file:
-            out_file.write('Player,GP,PA,R,SF,BB,K,1B,2B,3B,HR,Game\n')
+            out_file.write('Player,Game,GP,PA,R,SF,BB,K,1B,2B,3B,HR\n')
             for i, s in enumerate(self.games):
                 for p in self.cfg["roster"]:
                     s = self.calculate_cumulative_stats_for_player(p, i+1)
-                    out_file.write(f'{p},{s.games_played},{s.plate_appearances},{s.runs},{s.sac_flies},{s.walks},{s.strikeouts},{s.singles},{s.doubles},{s.triples},{s.home_runs},{i+1}\n')
+                    out_file.write(f'{p},{i+1},{s.games_played},{s.plate_appearances},{s.runs},{s.sac_flies},{s.walks},{s.strikeouts},{s.singles},{s.doubles},{s.triples},{s.home_runs}\n')
 
 
     def export_raw_non_cumulative_data(self, output_file_name):
