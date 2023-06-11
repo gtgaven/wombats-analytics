@@ -24,13 +24,13 @@ import plotly.io as io
 io.renderers.default='browser'
 
 class CareerGraph:
-    def __init__(self, file_path):
-        self.all_time_stats = pd.read_csv(file_path)
+    def __init__(self):
+        self.all_time_stats = pd.read_csv('output/all_time_stats.csv')
         self.all_time_stats['TB'] = (self.all_time_stats['1B'] + (self.all_time_stats['2B']*2) + (self.all_time_stats['3B']*3) + (self.all_time_stats['HR']*4))
 
         self.all_time_stats = self.all_time_stats.fillna(0)
 
-    def get_bar_graph(self, stat: str):
+    def get_bar_graph(self, stat):
         self.all_time_stats = self.all_time_stats.sort_values(by=stat, ascending=False)
         return px.bar(self.all_time_stats, x='Player', y=stat, title=f'Career Totals - {stat}')
 
@@ -40,7 +40,6 @@ class CareerGraph:
 
 
 class SeasonGraph:
-
     def __init__(self, year: str):
         cumulative_file_path = f'output/{year}/raw_cumulative.csv'
         non_cumulative_file_path = f'output/{year}/raw_non_cumulative.csv'
@@ -64,12 +63,12 @@ class SeasonGraph:
                        y='AVG', 
                        color='Player', 
                        title="Cumulative Batting Average by Game")
-
                 # TODO fix decimals
 
     def get_histogram_season_avg(self):
-        return px.histogram(self.cumul_last, x='AVG', nbins=7, title='Wombats Season AVG').update_layout(xaxis_title='AVG', yaxis_title='Frequency (Players)', bargap=0.01)
-    # You may want to adjust the drops by season depending on the distribution of games played.
+        histogram = px.histogram(self.cumul_last, x='AVG', nbins=7, title='Wombats Season AVG')
+        histogram.update_layout(xaxis_title='AVG', yaxis_title='Frequency (Players)', bargap=0.01)
+        return histogram
 
     def get_bar_bases_player_season(self):
         self.cumul_last = self.cumul_last.sort_values(by="TB", ascending=False)
@@ -80,22 +79,21 @@ class SeasonGraph:
     # TODO fix slg pct decimals
     # TODO overlay slg pct
 
-def main():
-    cg = CareerGraph('output/raw_all_time_stats.csv')
-    cg.get_grouped_bar_graph(['AVG', 'OBP', 'SLG']).show()
+def showfig():
+    instanceofseasongraph = SeasonGraph('2023')
+    histogram = instanceofseasongraph.get_histogram_season_avg() # self is imlicit
+    histogram.show()
     
+    # bar graph #
+    instanceofcareergraph = CareerGraph()
+    bargraph = instanceofcareergraph.get_bar_graph("AVG")
+    bargraph.show()
 
-    #gc = SeasonGraph('2022')
-    #graph =  gc.get_histogram_season_avg()
-    #graph.show()
-    #plot = ggplot_wrapper_2022.get_bar_bases_season_player()
-    #print(plot)
-    
-#    GraphCreator.get_bar_bases_player_season('testingexport.html')
 
 
 if __name__ == "__main__":
-    main()
+    print(__name__)
+    showfig()
 
 
 ############################
