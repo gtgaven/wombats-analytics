@@ -34,7 +34,7 @@ class SeasonStats:
         return cumulative_player_stats
 
     def export_cumulative_stats_pretty(self, output_file_name):
-        #todo convert to better looking format. html?
+        # TODO is html the best way to output this..?
         export_path = f'output/{self.cfg["year"]}/{output_file_name}'
         Path(os.path.dirname(export_path)).mkdir(parents=True, exist_ok=True)
         with open(export_path, "w") as out_file:
@@ -87,7 +87,7 @@ class SeasonStats:
 
 
     def export_non_cumulative_stats_pretty(self, output_file_name):
-        #todo convert to better looking format. html?
+        # TODO is html the best way to output this..?
         export_path = f'output/{self.cfg["year"]}/{output_file_name}'
         Path(os.path.dirname(export_path)).mkdir(parents=True, exist_ok=True)
         with open(export_path, "w") as out_file:
@@ -146,19 +146,19 @@ class SeasonStats:
         export_path = f'output/{self.cfg["year"]}/{output_file_name}'
         Path(os.path.dirname(export_path)).mkdir(parents=True, exist_ok=True)
         with open(export_path, "w") as out_file:
-            out_file.write('Player,GP,PA,R,SF,BB,K,1B,2B,3B,HR,Game\n')
+            out_file.write('Player,Game,GP,PA,R,SF,BB,K,1B,2B,3B,HR,H,AB,AVG,OBP,SLG\n')
             for i, s in enumerate(self.games):
                 for p in self.cfg["roster"]:
                     s = self.calculate_cumulative_stats_for_player(p, i+1)
-                    out_file.write(f'{p},{s.games_played},{s.plate_appearances},{s.runs},{s.sac_flies},{s.walks},{s.strikeouts},{s.singles},{s.doubles},{s.triples},{s.home_runs},{i+1}\n')
+                    out_file.write(f'{p},{i+1},{s.games_played},{s.plate_appearances},{s.runs},{s.sac_flies},{s.walks},{s.strikeouts},{s.singles},{s.doubles},{s.triples},{s.home_runs},{s.hits()},{s.at_bats()},{s.avg()},{s.obp()},{s.slg()}\n')
 
 
     def export_raw_non_cumulative_data(self, output_file_name):
         export_path = f'output/{self.cfg["year"]}/{output_file_name}'
         Path(os.path.dirname(export_path)).mkdir(parents=True, exist_ok=True)
         with open(export_path, "w") as out_file:
-            out_file.write('Player,GP,PA,R,SF,BB,K,1B,2B,3B,HR,Game,Home,Opponent,Op. Score\n')
+            out_file.write('Player,Game,GP,PA,R,SF,BB,K,1B,2B,3B,HR,H,AB,AVG,OBP,SLG,Home,Opponent,Op. Score\n')
             for i, g in enumerate(self.games):
                 for p in sorted(g.roster):
                     s = g.player_stats[p]
-                    out_file.write(f'{p},{s.games_played},{s.plate_appearances},{s.runs},{s.sac_flies},{s.walks},{s.strikeouts},{s.singles},{s.doubles},{s.triples},{s.home_runs},{i+1},{g.was_home},{g.op},{g.op_score}\n')
+                    out_file.write(f'{p},{i+1},{s.games_played},{s.plate_appearances},{s.runs},{s.sac_flies},{s.walks},{s.strikeouts},{s.singles},{s.doubles},{s.triples},{s.home_runs},{s.hits()},{s.at_bats()},{s.avg()},{s.obp()},{s.slg()},{g.was_home},{g.op},{g.op_score}\n')
