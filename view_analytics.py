@@ -23,7 +23,18 @@ import plotly.express as px
 import plotly.io as io
 io.renderers.default='browser'
 
-class GraphCreator:
+class CareerGraph:
+    def __init__(self, file_path):
+        self.all_time_stats = pd.read_csv(file_path)
+        self.all_time_stats['TB'] = (self.all_time_stats['1B'] + (self.all_time_stats['2B']*2) + (self.all_time_stats['3B']*3) + (self.all_time_stats['HR']*4))
+
+        self.all_time_stats = self.all_time_stats.fillna(0)
+
+    def get_bar_graph(self, stat: str):
+        self.all_time_stats = self.all_time_stats.sort_values(by=stat, ascending=False)
+        return px.bar(self.all_time_stats, x='Player', y=stat, title=f'Career Totals - {stat}')
+
+class SeasonGraph:
 
     def __init__(self, year: str):
         cumulative_file_path = f'output/{year}/raw_cumulative.csv'
@@ -31,8 +42,8 @@ class GraphCreator:
         self.cumul = pd.read_csv(cumulative_file_path)
         self.non_cumu = pd.read_csv(non_cumulative_file_path)
         
-        # create col:    total bases #
-        self.cumul['Bases'] = (self.cumul['1B'] + (self.cumul['2B']*2) + (self.cumul['3B']*3) + (self.cumul['HR']*4))
+        # create col:    TB = total bases #
+        self.cumul['TB'] = (self.cumul['1B'] + (self.cumul['2B']*2) + (self.cumul['3B']*3) + (self.cumul['HR']*4))
         
         # missing data #
         self.cumul = self.cumul.fillna(0)
@@ -56,7 +67,7 @@ class GraphCreator:
     # You may want to adjust the drops by season depending on the distribution of games played.
 
     def get_bar_bases_player_season(self):
-        self.cumul_last = self.cumul_last.sort_values(by="Bases", ascending=False)
+        self.cumul_last = self.cumul_last.sort_values(by="TB", ascending=False)
         return px.bar(self.cumul_last, x='Player',
                       y='Bases',
                       opacity=.7,
@@ -65,9 +76,13 @@ class GraphCreator:
     # TODO overlay slg pct
 
 def main():
-    gc = GraphCreator('2022')
-    graph =  gc.get_bar_bases_player_season()
-    graph.show()
+    cg = CareerGraph('output/all_time_stats.csv')
+    cg.get_bar_graph('SLG').show()
+    
+
+    #gc = SeasonGraph('2022')
+    #graph =  gc.get_histogram_season_avg()
+    #graph.show()
     #plot = ggplot_wrapper_2022.get_bar_bases_season_player()
     #print(plot)
     
