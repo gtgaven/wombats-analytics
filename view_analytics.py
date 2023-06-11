@@ -31,21 +31,6 @@ class GraphCreator:
         self.cumul = pd.read_csv(cumulative_file_path)
         self.non_cumu = pd.read_csv(non_cumulative_file_path)
         
-        # create col:     hits = single + double + triple + home run #
-        self.cumul['Hits'] = self.cumul['1B'] + self.cumul['2B'] + self.cumul['3B'] + self.cumul['HR']
-        
-        # create col:    at bats = plate appearance - sac flies - walks #
-        self.cumul['At Bats'] = self.cumul['PA'] - self.cumul['SF'] - self.cumul['BB']
-        
-        # create col:    on base pctage = at bats + walk + sac flies #
-        self.cumul['OBP'] = (self.cumul['Hits'] + self.cumul['BB']) / (self.cumul['At Bats'] + self.cumul['BB'] + self.cumul['SF'])
-        
-        # create col:    avg = hits / at bats # 
-        self.cumul['AVG'] = self.cumul['Hits'] / self.cumul['At Bats']
-        
-        # create col:    slug = at bat + walk + sac flies #
-        self.cumul['SLG'] = (self.cumul['1B'] + (self.cumul['2B']*2) + (self.cumul['3B']*3) + (self.cumul['HR']*4))/self.cumul['At Bats']
-        
         # create col:    total bases #
         self.cumul['Bases'] = (self.cumul['1B'] + (self.cumul['2B']*2) + (self.cumul['3B']*3) + (self.cumul['HR']*4))
         
