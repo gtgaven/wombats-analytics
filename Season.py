@@ -2,7 +2,7 @@ import csv
 import os
 from pathlib import Path
 
-from utils import format_float, html_header_with_css_styling
+from utils import format_float
 
 from Game import Game
 from Player import PlayerStats
@@ -35,10 +35,10 @@ class SeasonStats:
 
     def export_cumulative_stats_pretty(self, output_file_name):
         # TODO is html the best way to output this..?
-        export_path = f'output/{self.cfg["year"]}/{output_file_name}'
+        export_path = f'output/webapp/{self.cfg["year"]}/{output_file_name}'
         Path(os.path.dirname(export_path)).mkdir(parents=True, exist_ok=True)
         with open(export_path, "w") as out_file:
-            out_file.write(html_header_with_css_styling())
+            out_file.write('<!DOCTYPE html><html><head><link rel="stylesheet" href="../css/styles.css"></head>')
             out_file.write(f'''<body><div>
                 <table>
                 <caption>Wombats {self.cfg["year"]}</caption>
@@ -88,11 +88,11 @@ class SeasonStats:
 
     def export_non_cumulative_stats_pretty(self, output_file_name):
         # TODO is html the best way to output this..?
-        export_path = f'output/{self.cfg["year"]}/{output_file_name}'
+        export_path = f'output/webapp/{self.cfg["year"]}/{output_file_name}'
         Path(os.path.dirname(export_path)).mkdir(parents=True, exist_ok=True)
         with open(export_path, "w") as out_file:
 
-            out_file.write(html_header_with_css_styling())
+            out_file.write('<!DOCTYPE html><html><head><link rel="stylesheet" href="../css/styles.css"></head>')
             out_file.write('<body><div>')
 
             for g in self.games:

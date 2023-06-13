@@ -34,6 +34,11 @@ class CareerGraph:
         self.all_time_stats = self.all_time_stats.sort_values(by=stat, ascending=False)
         return px.bar(self.all_time_stats, x='Player', y=stat, title=f'Career Totals - {stat}')
 
+    def get_grouped_bar_graph(self, stats):
+        self.all_time_stats = self.all_time_stats.sort_values(by=stats[2], ascending=False)
+        return px.bar(self.all_time_stats, x='Player', y=stats, text_auto=".3f",barmode="group",title=f'Career Totals - {stats}')
+
+
 class SeasonGraph:
 
     def __init__(self, year: str):
@@ -76,8 +81,8 @@ class SeasonGraph:
     # TODO overlay slg pct
 
 def main():
-    cg = CareerGraph('output/all_time_stats.csv')
-    cg.get_bar_graph('SLG').show()
+    cg = CareerGraph('output/raw_all_time_stats.csv')
+    cg.get_grouped_bar_graph(['AVG', 'OBP', 'SLG']).show()
     
 
     #gc = SeasonGraph('2022')

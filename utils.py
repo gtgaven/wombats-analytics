@@ -1,55 +1,31 @@
+import os
+from pathlib import Path
+
 def format_float(percentage):
     return '{0:.3f}'.format(percentage)
 
-def html_header_with_css_styling():
-    return '''<!DOCTYPE html>
-    <html>
-        <head><style>
-            table {
-                border-collapse: collapse;
-                width: 100%;
-                color: #333;
-                font-family: Arial, sans-serif;
-                font-size: 16px;
-                text-align: center;
-                border-radius: 10px;
-                overflow: hidden;
-                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-                margin: auto;
-                margin-top: 25px;
-                margin-bottom: 25px;
-            } 
-            
-            table th {
-                background-color: #0087ff;
-                color: #fff;
-                font-weight: bold;
-                padding: 10px;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                border-top: 1px solid #fff;
-                border-bottom: 1px solid #ccc;
-            }
 
-            table tr:nth-child(even) td {
-                background-color: #bfbfbf;
-            }
+def export_webapp_landing_pages(out_dir: str, seasons):
+    try:
+        os.remove(f'{out_dir}/index.html')
+    except OSError:
+        pass
 
-            table tr:hover td {
-                background-color: #ffedcc;
-            }
+    seasons.sort()
+    for s in seasons:
+        file_list = os.listdir(f'{out_dir}/{s}')
+        with open(f'{out_dir}/{s}.html', 'w') as out_file:
+            out_file.write('<!DOCTYPE html><html><body>')
+            for page in file_list:
+                out_file.write(f'<a href="{s}/{page}">{page}</a><br>')
+            out_file.write('</body></html')
 
-            table td {
-                background-color: #fff;
-                padding: 10px;
-                border-bottom: 1px solid #ccc;
-                font-weight: bold;
-            }
+    file_list = os.listdir(f'{out_dir}')
+    file_list.sort()
+    with open(f'{out_dir}/index.html', 'w') as out_file:
+        out_file.write('<!DOCTYPE html><html><body>')
+        for f in file_list:
+            if os.path.isfile(f'{out_dir}/{f}'):
+                out_file.write(f'<a href="{f}">{Path(f).stem}</a><br>')
+        out_file.write('</body></html')
 
-            caption {
-                margin-bottom: 1em;
-                font-size: 1em;
-                font-weight: bold;
-                text-align: center;
-            }
-            </style></head>'''
