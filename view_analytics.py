@@ -52,6 +52,7 @@ class SeasonGraph:
     def __init__(self, year: str):
         cumulative_file_path = f'output/{year}/raw_cumulative.csv'
         non_cumulative_file_path = f'output/{year}/raw_non_cumulative.csv'
+        self.year = year
         self.cumul = pd.read_csv(cumulative_file_path)
         self.non_cumul = pd.read_csv(non_cumulative_file_path)
         
@@ -74,96 +75,91 @@ class SeasonGraph:
 
 
 # clustered bar: avg, obp, slg #
-    def get_bar_clustered(self, year: str):
+    def get_bar_clustered(self):
         self.cumul_last = self.cumul_last.sort_values(by="Player", ascending=True)
         return px.bar(self.cumul_last,
                           x="Player",
                           y=["AVG", "OBP", "SLG"],
                           text_auto=".3f", 
-                          title=f'Wombats Key Stats by Player – {year} Season',
+                          title=f'Wombats Key Stats by Player – {self.year} Season',
                           opacity=.8).update_layout(yaxis_title="Key Stats",
                           legend_title_text="Stat",
                           hoverlabel=dict(bgcolor="aliceblue"),
                           barmode='group')
 
 # stacked ops : on base and slg #
-    def get_stacked_ops(self, year: str):
+    def get_stacked_ops(self):
         self.cumul_last = self.cumul_last.sort_values(by="OPS", ascending=False)
         return px.bar(self.cumul_last,
                           x="Player",
                           y=["OBP", "SLG"],
                           text_auto=".3f", opacity=.8,
                           hover_data={'Player':False,'variable':False,'value':False,'OPS':':.3f'},
-                          title=f'Wombats OPS by Player – {year} Season').update_layout(yaxis_title="OPS",
+                          title=f'Wombats OPS by Player – {self.year} Season').update_layout(yaxis_title="OPS",
                           legend_title_text="OPS Stat", 
                           hoverlabel=dict(bgcolor="aliceblue"))
 
-    def get_line_cumulative_player_avg(self, year: str):
+    def get_line_cumulative_player_avg(self):
         return px.line(self.cumul, 
                        x='Game', 
                        y='AVG', 
                        color='Player', 
-                       title=f'Wombats Cumulative Batting Average by Game – {year} Season').update_xaxes(dtick=1)
+                       title=f'Wombats Cumulative Batting Average by Game – {self.year} Season').update_xaxes(dtick=1)
                 # TODO fix decimals
 
-    def get_histogram_season_avg(self, year: str):
-        histogram = px.histogram(self.cumul_last, x='AVG', nbins=7, title=f'Wombats Batting Average Distribution – {year} Season', opacity=.8)
+    def get_histogram_season_avg(self):
+        histogram = px.histogram(self.cumul_last, x='AVG', nbins=7, title=f'Wombats Batting Average Distribution – {self.year} Season', opacity=.8)
         histogram.update_layout(xaxis_title='AVG', yaxis_title='Frequency (Players)', bargap=0.01)
         return histogram
 
 
 # cumulative flow #
-    def get_areachart_season(self, year: str):
+    def get_areachart_season(self, stat: str):
         return px.area(self.cumul, x='Game', 
-                                  y='AVG', 
+                                  y=stat, 
                                   color = 'Player', 
-                                  title=f'Wombats Stacked Batting Average by Player – {year} Season').update_xaxes(dtick=1)
+                                  title=f'Wombats Stacked {stat} by Player – {self.year} Season').update_xaxes(dtick=1)
 
 # bar #
-    def get_bar_bases_player_season(self, year: str):
+    def get_bar_bases_player_season(self):
         self.cumul_last = self.cumul_last.sort_values(by="TB", ascending=False)
         return px.bar(self.cumul_last, x='Player',
                       y='TB',
                       opacity=.8,
-                      title=f'Wombats Total Bases by Player – {year} Season')
+                      title=f'Wombats Total Bases by Player – {self.year} Season')
     # TODO fix slg pct decimals
     # TODO overlay slg pct
     # TODO horizontal
 
 def showfig():
     # clustered bar – season #
-    instanceseason_clustered = SeasonGraph('2023')
-    clustered = instanceseason_clustered.get_bar_clustered('2023')
+    season_graph_2023 = SeasonGraph('2023')
+    clustered = season_graph_2023.get_bar_clustered()
     clustered.show()
     io.write_html(clustered, file='get_bar_clustered.html')
 
     # stacked - season- #
-    instanceseason_stacked = SeasonGraph('2023')
-    stackedbar = instanceseason_stacked.get_stacked_ops('2023') # self is implicit
+    stackedbar = season_graph_2023.get_stacked_ops() # self is implicit
     stackedbar.show()
     io.write_html(stackedbar, file='get_stackedbar_season.html')
 
     # bar - season #
-    instanceseason_bar = SeasonGraph('2023')
-    bargraphseason = instanceseason_bar.get_bar_bases_player_season('2023')
+    bargraphseason = season_graph_2023.get_bar_bases_player_season()
     bargraphseason.show()
     io.write_html(bargraphseason, file='get_bar_season.html')
 
     # histogram - season #
-    instanceseason_histogram = SeasonGraph('2023')
-    histogram = instanceseason_histogram.get_histogram_season_avg('2023')
+    histogram = season_graph_2023.get_histogram_season_avg()
     histogram.show()
     io.write_html(histogram, file='get_histogram_season.html')
 
     # line -season #
-    instanceseason_line = SeasonGraph('2023')
-    line = instanceseason_line.get_line_cumulative_player_avg('2023') 
+    line = season_graph_2023.get_line_cumulative_player_avg() 
     line.show()
     io.write_html(line, file='get_line_career.html')
     
-    # area -season#
-    instanceseason_area = SeasonGraph('2023')
-    areachart = instanceseason_area.get_areachart_season('2023')
+    # area -season #
+    areachart = season_graph_2023.get_areachart_season("H")
     areachart.show()
     io.write_html(areachart, file='get_areachart_season.html')
 
