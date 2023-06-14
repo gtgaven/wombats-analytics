@@ -157,8 +157,8 @@ class SeasonStats:
         export_path = f'output/{self.cfg["year"]}/{output_file_name}'
         Path(os.path.dirname(export_path)).mkdir(parents=True, exist_ok=True)
         with open(export_path, "w") as out_file:
-            out_file.write('Player,Game,GP,PA,R,SF,BB,K,1B,2B,3B,HR,H,AB,AVG,OBP,SLG,Home,Opponent,Op. Score\n')
+            out_file.write('Player,Game,GP,PA,R,SF,BB,K,1B,2B,3B,HR,H,AB,AVG,OBP,SLG,Home,Opponent,OpRuns,TeamRuns\n')
             for i, g in enumerate(self.games):
                 for p in sorted(g.roster):
                     s = g.player_stats[p]
-                    out_file.write(f'{p},{i+1},{s.games_played},{s.plate_appearances},{s.runs},{s.sac_flies},{s.walks},{s.strikeouts},{s.singles},{s.doubles},{s.triples},{s.home_runs},{s.hits()},{s.at_bats()},{s.avg()},{s.obp()},{s.slg()},{g.was_home},{g.op},{g.op_score}\n')
+                    out_file.write(f'{p},{i+1},{s.games_played},{s.plate_appearances},{s.runs},{s.sac_flies},{s.walks},{s.strikeouts},{s.singles},{s.doubles},{s.triples},{s.home_runs},{s.hits()},{s.at_bats()},{s.avg()},{s.obp()},{s.slg()},{g.was_home},{g.op},{g.op_score},{g.score}\n')
