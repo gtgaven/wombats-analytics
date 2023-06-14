@@ -23,6 +23,7 @@ import plotly.express as px
 import plotly.io as io
 import plotly.graph_objects as go
 import numpy as np
+from typing import List
 io.renderers.default='browser'
 
 class CareerGraph:
@@ -130,6 +131,16 @@ class SeasonGraph:
     # TODO fix slg pct decimals
     # TODO overlay slg pct
     # TODO horizontal
+
+def export_all_graphs(seasons: List[str], output_dir: str):
+    for year in seasons:
+        # new instance of season graph for each year
+        sg_instance = SeasonGraph(year)
+        clustered = sg_instance.get_bar_clustered()
+        io.write_html(clustered, file=f'{output_dir}/{year}/clustered_bar.html')
+
+        stacked_ops = sg_instance.get_stacked_ops()
+        io.write_html(stacked_ops, file=f'{output_dir}/{year}/stacked_ops.html')
 
 def showfig():
     # clustered bar – season #
