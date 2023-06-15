@@ -1,4 +1,6 @@
 import collections
+import os
+from pathlib import Path
 
 from Player import PlayerStats
 from utils import format_float
@@ -16,8 +18,9 @@ class CareerStats:
 
     def export_pretty(self, export_file_path):
         sorted_player_stats = collections.OrderedDict(sorted(self.all_players.items()))
+        Path(os.path.dirname(export_file_path)).mkdir(parents=True, exist_ok=True)
         with open(export_file_path, "w") as out_file:
-            out_file.write(f'''<!DOCTYPE html><html><head><link rel="stylesheet" href="css/styles.css"></head><body><div>
+            out_file.write(f'''<!DOCTYPE html><html><head><link rel="stylesheet" href="../css/styles.css"></head><body><div>
                                 <table>
                                 <caption>West Building Wombats</caption>
                                 <thead>

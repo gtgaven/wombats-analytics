@@ -6,9 +6,10 @@ from utils import export_webapp_landing_pages
 
 from Career import CareerStats
 from Season import SeasonStats
+from view_analytics import export_all_graphs
 
 SEASONS_TO_REGEN = ['2021', '2022', '2023']
-PRETTY_ALL_TIME_STATS_FILEPATH = 'output/webapp/all_time_stats.html'
+PRETTY_ALL_TIME_STATS_FILEPATH = 'output/webapp/career/all_time_stats.html'
 PRETTY_CUMULATIVE_FILENAME = 'cumulative.html'
 PRETTY_NON_CUMULATIVE_FILENAME = 'non_cumulative.html'
 RAW_ALL_TIME_STATS_FILEPATH = 'output/raw_all_time_stats.csv'
@@ -46,10 +47,10 @@ def main(update_webapp=False):
     career_stats.export_pretty(PRETTY_ALL_TIME_STATS_FILEPATH)
     validate_output()
 
-
+    print("Updating webapp files!")
+    export_all_graphs(SEASONS_TO_REGEN, WEBAPP_DIRECTORY)
+    export_webapp_landing_pages('output/webapp', SEASONS_TO_REGEN)
     if update_webapp:
-        print("Updating webapp files!")
-        export_webapp_landing_pages('output/webapp', SEASONS_TO_REGEN)
         try:
             copy_tree("css", "output/webapp/css")
             copy_tree("output/webapp", "/opt/tomcat/webapps/wombats/")

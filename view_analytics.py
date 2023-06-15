@@ -5,47 +5,57 @@ Institution: Jar Department
 Date Created: Tue Jun 6 2023
 Purpose: Wombats 2023 analytics
 """
-############################# Notes
+import numpy as np
+import pandas as pd 
 
-# clear console shortcut     ctrl + L
-
-############################# Initial operations
-
-# install and import packages #
-
-# Terminal #
-#    conda install -c condya-forge plotnine 
-#    conda install plotnine 
-#    Then I set my path manually with the PYTHONPATH manager.
-
-import pandas as pd # data manipulation
 import plotly.express as px
 import plotly.io as io
-import plotly.graph_objects as go
-import numpy as np
+from typing import List
 io.renderers.default='browser'
+io.templates.default = "seaborn"
 
 class CareerGraph:
     def __init__(self):
-        self.all_time_stats = pd.read_csv('output/all_time_stats.csv')
-        self.all_time_stats['TB'] = (self.all_time_stats['1B'] + (self.all_time_stats['2B']*2) + (self.all_time_stats['3B']*3) + (self.all_time_stats['HR']*4))
-
+        self.all_time_stats = pd.read_csv('output/raw_all_time_stats.csv')
+        self.all_time_stats["TB"] = (self.all_time_stats['1B'] + (self.all_time_stats['2B']*2) + (self.all_time_stats['3B']*3) + (self.all_time_stats['HR']*4))
+        self.all_time_stats["OPS"] = self.all_time_stats['OBP'] + self.all_time_stats['SLG']
         self.all_time_stats = self.all_time_stats.fillna(0)
 
-    def get_bar_graph(self, stat):
+    def get_bar_graph_int(self, stat):
         self.all_time_stats = self.all_time_stats.sort_values(by=stat, ascending=True)
         return px.bar(self.all_time_stats, 
-                      x=stat, 
-                      y='Player', 
-                      opacity=.8, 
-                      orientation='h',
-                      title=f'Wombats {stat} – Career Totals')
-#TODO read csv and show in var explorer
+                          x=stat,
+                          y="Player",
+                          title=f'Wombats {stat} - Career Totals',
+                          text_auto=".0f",
+                          orientation='h', 
+                          opacity=.8).update_layout(xaxis_title=f'{stat}',
+                          hoverlabel=dict(bgcolor="aliceblue"),
+                          barmode='group')
 
+    def get_bar_graph_pct(self, stat):
+        self.all_time_stats = self.all_time_stats.sort_values(by=stat, ascending=True)
+        return px.bar(self.all_time_stats, 
+                          x=stat,
+                          y="Player",
+                          text_auto=".3f", 
+                          title=f'Wombats {stat} - Career Totals',
+                          orientation='h',
+                          opacity=.8).update_layout(xaxis_title=f'{stat}',
+                          hoverlabel=dict(bgcolor="aliceblue"),
+                          barmode='group')
 
-    def get_grouped_bar_graph(self, stats):
-        self.all_time_stats = self.all_time_stats.sort_values(by=stats[2], ascending=False)
-        return px.bar(self.all_time_stats, x='Player', y=stats, text_auto=".3f",barmode="group",title=f'Career Totals - {stats}')
+    def get_stacked_ops(self):
+        self.all_time_stats = self.all_time_stats.sort_values(by="OPS", ascending=True)
+        return px.bar(self.all_time_stats,
+                          x=["OBP", "SLG"],
+                          y="Player",
+                          text_auto=".3f", opacity=.8,
+                          orientation='h',
+                          hover_data={'Player':False,'variable':False,'value':False,'OPS':':.3f'},
+                          title='Wombats OPS - Career Totals').update_layout(xaxis_title="OPS",
+                          legend_title_text="OPS Stat", 
+                          hoverlabel=dict(bgcolor="aliceblue"))
 
 
 class SeasonGraph:
@@ -59,7 +69,6 @@ class SeasonGraph:
         # create TB var (total bases) #
         self.cumul['TB'] = (self.cumul['1B'] + (self.cumul['2B']*2) + (self.cumul['3B']*3) + (self.cumul['HR']*4))
         self.non_cumul['TB'] = (self.non_cumul['1B'] + (self.non_cumul['2B']*2) + (self.non_cumul['3B']*3) + (self.non_cumul['HR']*4))
-        self.non_cumul['OPSPTR'] = (self.non_cumul['OBP']+self.non_cumul['SLG']) / self.non_cumul['TeamRuns']
         
         # missing data #
         self.cumul = self.cumul.fillna(0)
@@ -68,26 +77,27 @@ class SeasonGraph:
         # define dataframe: most recent game of season only #
         last_game = self.cumul['Game'].max()
         self.cumul_last = self.cumul.drop(self.cumul[self.cumul['Game']!=last_game].index)
-        self.cumul_last = self.cumul_last.drop(self.cumul_last[self.cumul_last['GP']==0].index)
 
         # create OPS var #
         self.cumul_last["OPS"] = self.cumul_last['OBP'] + self.cumul_last['SLG']
 
 
-# clustered bar: avg, obp, slg #
+    # clustered bar: avg, obp, slg #
     def get_bar_clustered(self):
         self.cumul_last = self.cumul_last.sort_values(by="Player", ascending=True)
         return px.bar(self.cumul_last,
                           x="Player",
                           y=["AVG", "OBP", "SLG"],
-                          text_auto=".3f", 
+                          text_auto=".3f",
                           title=f'Wombats Key Stats by Player – {self.year} Season',
+                          hover_data={'Player':True,'variable':False,'value':False},
                           opacity=.8).update_layout(yaxis_title="Key Stats",
-                          legend_title_text="Stat",
+                          legend_title_text="Stat", 
                           hoverlabel=dict(bgcolor="aliceblue"),
                           barmode='group')
+# TODO tooltip
 
-# stacked ops : on base and slg #
+    # stacked ops : on base and slg #
     def get_stacked_ops(self):
         self.cumul_last = self.cumul_last.sort_values(by="OPS", ascending=False)
         return px.bar(self.cumul_last,
@@ -113,65 +123,61 @@ class SeasonGraph:
         return histogram
 
 
-# cumulative flow #
+    # cumulative flow #
     def get_areachart_season(self, stat: str):
         return px.area(self.cumul, x='Game', 
                                   y=stat, 
                                   color = 'Player', 
                                   title=f'Wombats Stacked {stat} by Player – {self.year} Season').update_xaxes(dtick=1)
+ # TODO sort areas and tooltips
 
-# bar #
+    # bar #
     def get_bar_bases_player_season(self):
         self.cumul_last = self.cumul_last.sort_values(by="TB", ascending=False)
         return px.bar(self.cumul_last, x='Player',
                       y='TB',
                       opacity=.8,
                       title=f'Wombats Total Bases by Player – {self.year} Season')
-    # TODO fix slg pct decimals
     # TODO overlay slg pct
     # TODO horizontal
 
-def showfig():
-    # clustered bar – season #
-    season_graph_2023 = SeasonGraph('2023')
-    clustered = season_graph_2023.get_bar_clustered()
-    clustered.show()
-    io.write_html(clustered, file='get_bar_clustered.html')
+def export_all_graphs(seasons: List[str], output_dir: str):
+    for year in seasons:
+        # new instance of season graph for each year
+        sg_instance = SeasonGraph(year)
+        clustered = sg_instance.get_bar_clustered()
+        io.write_html(clustered, file=f'{output_dir}/{year}/CHART_avg_obp_slg.html')
 
-    # stacked - season- #
-    stackedbar = season_graph_2023.get_stacked_ops() # self is implicit
-    stackedbar.show()
-    io.write_html(stackedbar, file='get_stackedbar_season.html')
+        stacked_ops = sg_instance.get_stacked_ops()
+        io.write_html(stacked_ops, file=f'{output_dir}/{year}/CHART_ops.html')
 
-    # bar - season #
-    bargraphseason = season_graph_2023.get_bar_bases_player_season()
-    bargraphseason.show()
-    io.write_html(bargraphseason, file='get_bar_season.html')
+        season_tb = sg_instance.get_bar_bases_player_season()
+        io.write_html(season_tb, file=f'{output_dir}/{year}/CHART_tb.html')
 
-    # histogram - season #
-    histogram = season_graph_2023.get_histogram_season_avg()
-    histogram.show()
-    io.write_html(histogram, file='get_histogram_season.html')
-
-    # line -season #
-    line = season_graph_2023.get_line_cumulative_player_avg() 
-    line.show()
-    io.write_html(line, file='get_line_career.html')
+    cs_instance = CareerGraph()
+    clustered_graph = cs_instance.get_bar_graph_pct('AVG')
+    io.write_html(clustered_graph, file=f'{output_dir}/career/CHART_avg.html')
     
-    # area -season #
-    areachart = season_graph_2023.get_areachart_season("H")
-    areachart.show()
-    io.write_html(areachart, file='get_areachart_season.html')
+    ops_graph = cs_instance.get_stacked_ops()
+    io.write_html(ops_graph, file=f'{output_dir}/career/CHART_ops.html')
 
-    # bar graph - career #
-    instanceofcareergraph = CareerGraph()
-    bargraphcareer = instanceofcareergraph.get_bar_graph("TB")
-    bargraphcareer.show()
-    io.write_html(bargraphcareer, file='get_bar_career.html')
+    career_tb = cs_instance.get_bar_graph_int('TB')
+    io.write_html(career_tb, file=f'{output_dir}/career/CHART_tb.html')
 
+
+def showfigs():
+    cs_instance = CareerGraph()
+    cs_instance.get_bar_graph_pct('AVG').show()
+    cs_instance.get_stacked_ops().show()
+    cs_instance.get_bar_graph_int('TB').show()
+    
+    sg_instance = SeasonGraph('2023')
+    sg_instance.get_bar_clustered().show()
+    sg_instance.get_stacked_ops().show()
+    sg_instance.get_bar_bases_player_season().show()
+    
 if __name__ == "__main__":
-    print(__name__)
-    showfig()
+    showfigs()
 
 
 ############################
