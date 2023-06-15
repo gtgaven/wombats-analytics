@@ -5,26 +5,14 @@ Institution: Jar Department
 Date Created: Tue Jun 6 2023
 Purpose: Wombats 2023 analytics
 """
-############################# Notes
+import numpy as np
+import pandas as pd 
 
-# clear console shortcut     ctrl + L
-
-############################# Initial operations
-
-# install and import packages #
-
-# Terminal #
-#    conda install -c condya-forge plotnine 
-#    conda install plotnine 
-#    Then I set my path manually with the PYTHONPATH manager.
-
-import pandas as pd # data manipulation
 import plotly.express as px
 import plotly.io as io
-import plotly.graph_objects as go
-import numpy as np
 from typing import List
 io.renderers.default='browser'
+io.templates.default = "seaborn"
 
 class CareerGraph:
     def __init__(self):
@@ -33,38 +21,39 @@ class CareerGraph:
         self.all_time_stats["OPS"] = self.all_time_stats['OBP'] + self.all_time_stats['SLG']
         self.all_time_stats = self.all_time_stats.fillna(0)
 
-
     def get_bar_graph_int(self, stat):
-        self.all_time_stats = self.all_time_stats.sort_values(by=stat, ascending=False)
+        self.all_time_stats = self.all_time_stats.sort_values(by=stat, ascending=True)
         return px.bar(self.all_time_stats, 
-                          x="Player",
-                          y=stat,
+                          x=stat,
+                          y="Player",
                           title=f'Wombats {stat} - Career Totals',
-                          opacity=.8).update_layout(yaxis_title="Key Stats",
-                          legend_title_text="Stat",
+                          text_auto=".0f",
+                          orientation='h', 
+                          opacity=.8).update_layout(xaxis_title=f'{stat}',
                           hoverlabel=dict(bgcolor="aliceblue"),
                           barmode='group')
 
     def get_bar_graph_pct(self, stat):
-        self.all_time_stats = self.all_time_stats.sort_values(by=stat, ascending=False)
+        self.all_time_stats = self.all_time_stats.sort_values(by=stat, ascending=True)
         return px.bar(self.all_time_stats, 
-                          x="Player",
-                          y=stat,
+                          x=stat,
+                          y="Player",
                           text_auto=".3f", 
                           title=f'Wombats {stat} - Career Totals',
-                          opacity=.8).update_layout(yaxis_title="Key Stats",
-                          legend_title_text="Stat",
+                          orientation='h',
+                          opacity=.8).update_layout(xaxis_title=f'{stat}',
                           hoverlabel=dict(bgcolor="aliceblue"),
                           barmode='group')
 
     def get_stacked_ops(self):
-        self.all_time_stats = self.all_time_stats.sort_values(by="OPS", ascending=False)
+        self.all_time_stats = self.all_time_stats.sort_values(by="OPS", ascending=True)
         return px.bar(self.all_time_stats,
-                          x="Player",
-                          y=["OBP", "SLG"],
+                          x=["OBP", "SLG"],
+                          y="Player",
                           text_auto=".3f", opacity=.8,
+                          orientation='h',
                           hover_data={'Player':False,'variable':False,'value':False,'OPS':':.3f'},
-                          title=f'Wombats OPS - Career Totals').update_layout(yaxis_title="OPS",
+                          title='Wombats OPS - Career Totals').update_layout(xaxis_title="OPS",
                           legend_title_text="OPS Stat", 
                           hoverlabel=dict(bgcolor="aliceblue"))
 
@@ -99,12 +88,14 @@ class SeasonGraph:
         return px.bar(self.cumul_last,
                           x="Player",
                           y=["AVG", "OBP", "SLG"],
-                          text_auto=".3f", 
+                          text_auto=".3f",
                           title=f'Wombats Key Stats by Player – {self.year} Season',
+                          hover_data={'Player':True,'variable':False,'value':False},
                           opacity=.8).update_layout(yaxis_title="Key Stats",
-                          legend_title_text="Stat",
+                          legend_title_text="Stat", 
                           hoverlabel=dict(bgcolor="aliceblue"),
                           barmode='group')
+# TODO tooltip
 
     # stacked ops : on base and slg #
     def get_stacked_ops(self):
@@ -138,6 +129,7 @@ class SeasonGraph:
                                   y=stat, 
                                   color = 'Player', 
                                   title=f'Wombats Stacked {stat} by Player – {self.year} Season').update_xaxes(dtick=1)
+ # TODO sort areas and tooltips
 
     # bar #
     def get_bar_bases_player_season(self):
@@ -173,46 +165,19 @@ def export_all_graphs(seasons: List[str], output_dir: str):
     io.write_html(career_tb, file=f'{output_dir}/career/CHART_tb.html')
 
 
-def showfig():
-    # clustered bar – season #
-    season_graph_2023 = SeasonGraph('2023')
-    clustered = season_graph_2023.get_bar_clustered()
-    clustered.show()
-    io.write_html(clustered, file='get_bar_clustered.html')
-
-    # stacked - season- #
-    stackedbar = season_graph_2023.get_stacked_ops() # self is implicit
-    stackedbar.show()
-    io.write_html(stackedbar, file='get_stackedbar_season.html')
-
-    # bar - season #
-    bargraphseason = season_graph_2023.get_bar_bases_player_season()
-    bargraphseason.show()
-    io.write_html(bargraphseason, file='get_bar_season.html')
-
-    # histogram - season #
-    histogram = season_graph_2023.get_histogram_season_avg()
-    histogram.show()
-    io.write_html(histogram, file='get_histogram_season.html')
-
-    # line -season #
-    line = season_graph_2023.get_line_cumulative_player_avg() 
-    line.show()
-    io.write_html(line, file='get_line_career.html')
+def showfigs():
+    cs_instance = CareerGraph()
+    cs_instance.get_bar_graph_pct('AVG').show()
+    cs_instance.get_stacked_ops().show()
+    cs_instance.get_bar_graph_int('TB').show()
     
-    # area -season #
-    areachart = season_graph_2023.get_areachart_season("H")
-    areachart.show()
-    io.write_html(areachart, file='get_areachart_season.html')
-
-    # bar graph - career #
-    instanceofcareergraph = CareerGraph()
-    bargraphcareer = instanceofcareergraph.get_bar_graph("TB")
-    bargraphcareer.show()
-    io.write_html(bargraphcareer, file='get_bar_career.html')
-
+    sg_instance = SeasonGraph('2023')
+    sg_instance.get_bar_clustered().show()
+    sg_instance.get_stacked_ops().show()
+    sg_instance.get_bar_bases_player_season().show()
+    
 if __name__ == "__main__":
-    showfig()
+    showfigs()
 
 
 ############################

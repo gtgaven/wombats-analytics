@@ -47,11 +47,10 @@ def main(update_webapp=False):
     career_stats.export_pretty(PRETTY_ALL_TIME_STATS_FILEPATH)
     validate_output()
 
-
+    print("Updating webapp files!")
+    export_all_graphs(SEASONS_TO_REGEN, WEBAPP_DIRECTORY)
+    export_webapp_landing_pages('output/webapp', SEASONS_TO_REGEN)
     if update_webapp:
-        print("Updating webapp files!")
-        export_all_graphs(SEASONS_TO_REGEN, WEBAPP_DIRECTORY)
-        export_webapp_landing_pages('output/webapp', SEASONS_TO_REGEN)
         try:
             copy_tree("css", "output/webapp/css")
             copy_tree("output/webapp", "/opt/tomcat/webapps/wombats/")
