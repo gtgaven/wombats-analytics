@@ -29,21 +29,25 @@ class CareerGraph:
                           title=f'Wombats {stat} - Career Totals',
                           text_auto=".0f",
                           orientation='h', 
+                          hover_data={'Player':False},
                           opacity=.8).update_layout(xaxis_title=f'{stat}',
                           hoverlabel=dict(bgcolor="aliceblue"),
-                          barmode='group')
+                          hovermode='closest',
+                          barmode='group').update_traces(hovertemplate='%{y}')
+
 
     def get_bar_graph_pct(self, stat):
         self.all_time_stats = self.all_time_stats.sort_values(by=stat, ascending=True)
-        return px.bar(self.all_time_stats, 
+        return px.bar(self.all_time_stats,
                           x=stat,
                           y="Player",
-                          text_auto=".3f", 
+                          text_auto=".3f",
                           title=f'Wombats {stat} - Career Totals',
                           orientation='h',
+                          hover_data={'Player':False},
                           opacity=.8).update_layout(xaxis_title=f'{stat}',
                           hoverlabel=dict(bgcolor="aliceblue"),
-                          barmode='group')
+                          barmode='group').update_traces(hovertemplate='%{y}')
 
     def get_stacked_ops(self):
         self.all_time_stats = self.all_time_stats.sort_values(by="OPS", ascending=True)
@@ -51,12 +55,11 @@ class CareerGraph:
                           x=["OBP", "SLG"],
                           y="Player",
                           text_auto=".3f", opacity=.8,
-                          orientation='h',
-                          hover_data={'Player':False,'variable':False,'value':False,'OPS':':.3f'},
+                          orientation='h', 
                           title='Wombats OPS - Career Totals').update_layout(xaxis_title="OPS",
                           legend_title_text="OPS Stat", 
-                          hoverlabel=dict(bgcolor="aliceblue"))
-
+                          hoverlabel=dict(bgcolor="aliceblue")).update_traces(hovertemplate='%{y}<br>OPS=%{customdata:.3f}', customdata=self.all_time_stats['OPS'])
+                          # %{...}  is used for referencing data from the trace itself, not for accessing columns directly. To include a custom column value in the hovertemplate, you need to pass it as a part of the customdata argument within the update_traces function. 
 
 class SeasonGraph:
     def __init__(self, year: str):
@@ -76,7 +79,15 @@ class SeasonGraph:
 
         # define dataframe: most recent game of season only #
         last_game = self.cumul['Game'].max()
+        
+        #indexes_to_drop = []
+        #for i, row in self.cumul.iterrows():
+        #    if row["Game"] != last_game:
+        #        indexes_to_drop.append(i)
+        #self.cumul_last = self.cumul.drop(indexes_to_drop)
+        
         self.cumul_last = self.cumul.drop(self.cumul[self.cumul['Game']!=last_game].index)
+        #self.cumul_last = self.cumul[self.cumul['Game']==last_game]
 
         # create OPS var #
         self.cumul_last["OPS"] = self.cumul_last['OBP'] + self.cumul_last['SLG']
@@ -90,12 +101,11 @@ class SeasonGraph:
                           y=["AVG", "OBP", "SLG"],
                           text_auto=".3f",
                           title=f'Wombats Key Stats by Player – {self.year} Season',
-                          hover_data={'Player':True,'variable':False,'value':False},
                           opacity=.8).update_layout(yaxis_title="Key Stats",
-                          legend_title_text="Stat", 
+                          legend_title_text="Stat",
                           hoverlabel=dict(bgcolor="aliceblue"),
-                          barmode='group')
-# TODO tooltip
+                          barmode='group').update_traces(hovertemplate='%{x}')
+                                                    # TODO tooltip
 
     # stacked ops : on base and slg #
     def get_stacked_ops(self):
@@ -125,19 +135,25 @@ class SeasonGraph:
 
     # cumulative flow #
     def get_areachart_season(self, stat: str):
-        return px.area(self.cumul, x='Game', 
-                                  y=stat, 
-                                  color = 'Player', 
-                                  title=f'Wombats Stacked {stat} by Player – {self.year} Season').update_xaxes(dtick=1)
- # TODO sort areas and tooltips
+        self.non_cumul = self.non_cumul.sort_values(by="Player", ascending=False)
+        #.drop(self.non_cumul[self.non_cumul['GP']==0].index)
+            # sorted by Player alphabetical
+        #self.non_cumul['AreaChartUnit'] = '%'
+        return px.area(self.non_cumul, x='Game', 
+                                  y=stat,
+                                  hover_data={'Player':True,f'{stat}':':.3f'},
+                                  title=f'Wombats Stacked {stat} by Player (Non-Cumulative) – {self.year}', 
+                                  groupnorm='percent',
+                                  color = 'Player').update_xaxes(dtick=1).update_layout(legend={'traceorder': 'reversed'}).update_traces(hovertemplate='%{y:.3f} %')
+                                  #update_yaxes(dtick=25, ticktext='AreaChartUnit').
 
     # bar #
     def get_bar_bases_player_season(self):
         self.cumul_last = self.cumul_last.sort_values(by="TB", ascending=False)
         return px.bar(self.cumul_last, x='Player',
                       y='TB',
-                      opacity=.8,
-                      title=f'Wombats Total Bases by Player – {self.year} Season')
+                      title=f'Wombats Total Bases by Player – {self.year} Season',
+                      opacity=.8).update_traces(hovertemplate='%{x}<br>TB=%{y}').update_layout(hoverlabel=dict(bgcolor="aliceblue"))
     # TODO overlay slg pct
     # TODO horizontal
 
@@ -166,16 +182,18 @@ def export_all_graphs(seasons: List[str], output_dir: str):
 
 
 def showfigs():
-    cs_instance = CareerGraph()
-    cs_instance.get_bar_graph_pct('AVG').show()
-    cs_instance.get_stacked_ops().show()
-    cs_instance.get_bar_graph_int('TB').show()
-    
+#    cs_instance = CareerGraph()
+#    cs_instance.get_bar_graph_pct('AVG').show()
+#    cs_instance.get_stacked_ops().show()
+#    cs_instance.get_bar_graph_int('TB').show()
+
     sg_instance = SeasonGraph('2023')
     sg_instance.get_bar_clustered().show()
-    sg_instance.get_stacked_ops().show()
-    sg_instance.get_bar_bases_player_season().show()
-    
+#    sg_instance.get_stacked_ops().show()
+    #sg_instance.get_bar_bases_player_season().show()
+#    sg_instance.get_areachart_season('R').show()
+
+
 if __name__ == "__main__":
     showfigs()
 
