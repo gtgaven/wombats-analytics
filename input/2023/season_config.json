@@ -18,6 +18,7 @@
         "Paul",
         "Phil",
         "Ryan",
+        "Rob",
         "Shane",
         "Steve",
         "Ted",
@@ -51,6 +52,20 @@
             "op_score": 10,
             "score": 18,
             "player_count": 13
+        },
+        {
+            "was_home": false,
+            "op": "Tailgators",
+            "op_score": 12,
+            "score": 8,
+            "player_count": 10
+        },
+        {
+            "was_home": true,
+            "op": "Tailgators",
+            "op_score": 19,
+            "score": 4,
+            "player_count": 10
         } 
     ]
 
