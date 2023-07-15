@@ -1,23 +1,31 @@
 import csv
+import json
 from pathlib import Path
 from Player import PlayerStats
+from metadata import ROSTERS
 
 class Game:
-    def __init__(self, game_num: int, game_json, roster, input_dir: str):
-        self.game_num = game_num
-        self.input_dir = input_dir
-        self.roster = set(roster)
+    def __init__(self, game_json_path, stats_csv_path):
+        with open(game_json_path, "r") as config:
+            game_json = json.load(config)
+
+        self.year = game_json["year"]
+        self.team = game_json["team"]
+        self.gamenum = game_json["game_num"]
+        self.roster = set(ROSTERS[str(self.year)])
         self.was_home = game_json["was_home"]
-        self.op = game_json["op"]
-        self.op_score = game_json["op_score"]
+        self.opponent = game_json["op"]
+        self.opponentscore = game_json["op_score"]
         self.score = game_json["score"]
         self.player_count = game_json["player_count"]
-        self.player_stats_file_name = f'game_{self.game_num}.csv'
         self.player_stats = dict()
+        self._load_stats(stats_csv_path)
 
+    def __str__(self):
+        return f'{self.year} {self.team} #{self.gamenum} vs {self.opponent}'
 
-    def load_stats(self):
-        with open(Path(self.input_dir, self.player_stats_file_name), "r") as stats_file:
+    def _load_stats(self, stats_csv_path):
+        with open(stats_csv_path, "r") as stats_file:
             reader = csv.reader(stats_file)
             header = next(reader)
             if header != PlayerStats.EXPECTED_FORMAT:
@@ -37,12 +45,10 @@ class Game:
             for absent_player in absent_players:
                 self.player_stats[absent_player] = PlayerStats()
 
-        self.__validate()
+        self._validate()
 
-
-    def __validate(self):
+    def _validate(self):
         calculated_score = 0
-        calculated_player_count = 0
         for name in self.roster:
             calculated_score += self.player_stats[name].runs
 
