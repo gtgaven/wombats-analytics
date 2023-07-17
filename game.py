@@ -1,7 +1,7 @@
 import csv
 import json
 from pathlib import Path
-from Player import PlayerStats
+from player import PlayerStats
 from metadata import ROSTERS
 
 class Game:

@@ -1,5 +1,10 @@
 from mysql import connector
 
+from player import PlayerStats
+
+
+PLAYER_COLUMNS = "plateappearances, runs, sacflies, walks, strikeouts, singles, doubles, triples, homeruns"
+
 class DbConnection():
     def __init__(self, username, password, commit_changes=False):
         self.db = connector.connect(host='localhost', database='softball', user=username, password=password)
@@ -47,6 +52,28 @@ class DbConnection():
             player_id = self.get_player_id(player)
             self._insert_player_stat(player_id, game_id, stat)
 
+    def get_career_stats_for_player(self, playername):
+        id = self.get_player_id(playername)
+        query = f'''SELECT {PLAYER_COLUMNS} FROM playerstat
+                    INNER JOIN game ON playerstat.game=game.id
+                    WHERE playerstat.player={id};'''
+        self.cursor.execute(query)
+        stats = PlayerStats()
+        query_results = self.cursor.fetchall()
+        for p in query_results:
+            print(p)
+            stats = stats + PlayerStats(1, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8])
+
+        return stats
+
+    def get_all_stats(self):
+        query = f'''SELECT * FROM playerstat
+                    INNER JOIN game ON playerstat.game=game.id
+                    INNER JOIN player ON playerstat.player=player.id;'''
+        self.cursor.execute(query)
+        playerstats = self.cursor.fetchall()
+        return playerstats
+
     def get_game_id(self, team, year, gamenum):
         self.cursor.execute(f'SELECT id, team, year, gamenum FROM game WHERE team = "{team}" AND year = {year} AND gamenum = {gamenum};')
         games = self.cursor.fetchall()
@@ -65,6 +92,12 @@ class DbConnection():
             raise RuntimeError(f'player with name {playername} not found in DB, len {len(ids)}')
         
         return ids[0][0]
+
+    def get_player_list(self):
+        self.cursor.execute(f'SELECT name FROM player;')
+        query_result = self.cursor.fetchall()
+        names = [n[0] for n in query_result]
+        return names
 
     def insert_game(self, game):
         if self.get_game_id(game.team, game.year, game.gamenum) != 0:
