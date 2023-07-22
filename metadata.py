@@ -1,36 +1,4 @@
-ALL_TIME_PLAYERS = [
-    "Anna",
-    "Brad",
-    "Brandon",
-    "Cam",
-    "Carol",
-    "Chad",
-    "Greg",
-    "Hunter",
-    "Ian",
-    "Isaac",
-    "Jake",
-    "Jamila",
-    "Josh",
-    "Katie",
-    "Lance",
-    "Luke",
-    "Matthew",
-    "Moises",
-    "Nate La",
-    "Nate Lo",
-    "Nate Ly",
-    "Paul",
-    "Phil",
-    "Ron",
-    "Ruthie",
-    "Ryan",
-    "Shane",
-    "Steve",
-    "Ted",
-    "Walt",
-    "Zach"
-]
+#TODO this info should move to the database
 
 ROSTERS = {
     "2021": ["Anna",
