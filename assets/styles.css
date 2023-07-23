@@ -1,11 +1,9 @@
 table {
     border-collapse: collapse;
     width: 100%;
-    color: #333;
-    font-family: Arial, sans-serif;
-    font-size: 16px;
+    font-family: Calibri;
+    font-size: 20px;
     text-align: center;
-    border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     margin: auto;
@@ -14,11 +12,9 @@ table {
 } 
 
 table th {
-    background-color: #070707;
+    background-color: #696969;
     color: #fff;
-    font-weight: bold;
     padding: 10px;
-    text-transform: uppercase;
     letter-spacing: 1px;
     border-top: 1px solid #fff;
     border-bottom: 1px solid #ccc;
@@ -32,12 +28,10 @@ table td {
     background-color: #fff;
     padding: 10px;
     border-bottom: 1px solid #ccc;
-    font-weight: bold;
 }
 
 caption {
     margin-bottom: 1em;
     font-size: 1em;
-    font-weight: bold;
     text-align: center;
 }

@@ -63,7 +63,7 @@ nav_bar = dbc.NavbarSimple(
                 id='season-select',
                 value='All')
             ],
-            style={"width": "200px"}
+            style={"width": "200px", "color":"#fff"}
         ),
         html.Div([
             'Player(s):',
@@ -73,12 +73,12 @@ nav_bar = dbc.NavbarSimple(
                 value=['Team Cumulative', 'The Average Wombat'],
                 multi=True)
             ],
-            style={"width": "250px"}
+            style={"width": "250px", "color":"#fff"}
         ),
     ],
-    brand="Staaaaats",
+    brand="West Building Wombats",
     brand_href="/",
-    color="primary",
+    color="#696969",
     dark=True
 )
 
@@ -150,21 +150,39 @@ def update_graph(season):
 
     df = pd.DataFrame()
     df['Player'] = stats.keys()
-    df['AVG'] = [stats[i].avg() for i in stats]
-    df['OBP'] = [stats[i].obp() for i in stats]
-    df['SLG'] = [stats[i].slg() for i in stats]
-
+    df['Batting Average'] = [stats[i].avg() for i in stats]
+    df['On Base Percentage'] = [stats[i].obp() for i in stats]
+    df['Slugging Percentage'] = [stats[i].slg() for i in stats]
+    df['Games Played'] = [stats[i].games_played for i in stats]
+    df['Plate Appearances'] = [stats[i].plate_appearances for i in stats]
+    df['At Bats'] = [stats[i].at_bats() for i in stats]
+    df['Runs'] = [stats[i].runs for i in stats]
+    df['Walks']= [stats[i].walks for i in stats] 
+    df['Sac Flies'] = [stats[i].sac_flies for i in stats]
+    df['Strikeouts'] = [stats[i].strikeouts for i in stats]
+    df['Hits']= [stats[i].hits() for i in stats]
+    df['Singles']= [stats[i].singles for i in stats]
+    df['Doubles'] = [stats[i].doubles for i in stats]
+    df['Triples'] = [stats[i].triples for i in stats]
+    df['Home Runs'] = [stats[i].home_runs for i in stats]
     layout = []
-    for s in ['AVG', 'OBP', 'SLG']:
+    for s in df.columns[1:]:
         if season == 'All':
-            chart_title = f'{s} - All Time'
+            chart_title = f'{s} - Top 10 Players All Time'
         else:
-            chart_title = f'{s} - {season} Season'
-        
-        layout.append(dcc.Graph(figure=go.Figure(layout={'title':chart_title, 'xaxis': {'title': 'Player'}, 'yaxis': {'title':s}}, 
-                                                 data=go.Bar(x=df['Player'],
-                                                             y=df[s],
-                                                             text=['%.3f'%(i) for i in df[s]]))))
+            chart_title = f'{s} - Top 10 Players for {season}'
+        df = df.sort_values([s], ascending=False)
+        if s == 'Batting Average' or s == 'On Base Percentage' or s == 'Slugging Percentage':
+            text_format = ['%.3f'%(i) for i in df[s][:10]]
+        else:
+            text_format = [i for i in df[s][:10]]
+        bargraph = go.Figure(layout={'title':chart_title}, 
+                                                 data=go.Bar(x=df['Player'][:10],
+                                                             y=df[s][:10],
+                                                             text=text_format))
+        bargraph.update_layout(template="plotly_white", font={'size':16, 'family':"Calibri", 'color':"#000"})
+        bargraph.update_traces(marker_color='#696969')
+        layout.append(dcc.Graph(figure=bargraph))
 
     return layout
 
