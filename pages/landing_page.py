@@ -1,7 +1,6 @@
 from dash import Dash, State, dcc, html, Input, Output, callback
 import dash
 import dash_bootstrap_components as dbc
-from metadata import ROSTERS
 from player import PlayerStats
 import plotly.graph_objs as go
 from dash_bootstrap_components._components.Container import Container
@@ -30,7 +29,7 @@ def get_cumulative_stats(player, season):
         players = all_players
     else:
         seasons = [season]
-        players = ROSTERS[season]
+        players = db.get_roster_for_season(season)
 
     cumulative_stats = PlayerStats()
     if player == 'Team Cumulative':
@@ -61,11 +60,12 @@ nav_bar = dbc.NavbarSimple(
         html.Div([
             'Season:',
             dcc.Dropdown(
-                options=['All', '2021', '2022', '2023'],#todo replace with get_seasons
+                options=season_dropdown_list,
                 id='season-select',
-                value='All')
+                value='All',
+                style={"color": "#000000"})
             ],
-            style={"width": "200px", "color":"#fff"}
+            style={"width": "200px", "color":"#fff", "padding-right": "20px"}
         ),
         html.Div([
             'Player(s):',
@@ -73,10 +73,17 @@ nav_bar = dbc.NavbarSimple(
                 options=player_dropdown_list,
                 id='player-select',
                 value=['Team Cumulative', 'The Average Wombat'],
-                multi=True)
+                multi=True,
+                style={"color": "#000000"})
             ],
-            style={"width": "250px", "color":"#fff"}
+            style={"width": "250px", "color":"#fff", "padding-right": "20px"}
         ),
+        html.Div([
+            dbc.Button('Raw Stats', color="dark", href="/raw")
+            ],
+            style={"height": "24px", "color":"#fff", "padding-right": "20px", "padding-top": "24px"}
+        )
+        
     ],
     brand="West Building Wombats",
     brand_href="/",
@@ -87,7 +94,7 @@ nav_bar = dbc.NavbarSimple(
 
 layout = html.Div([
     nav_bar,
-	html.Div(id='stats-summary'),
+    html.Div(id='stats-summary'),
     html.Div(id='avg-graph')
 ])
 
@@ -103,6 +110,16 @@ def update_stats_summary(players, season):
 
     if not season:
         return
+
+    if season == "All":
+        header = "All Time Stats"
+        footer = ''
+    elif season == 2021:
+        header = '2021 Season*'
+        footer = ' *no extra-base hits recorded in 2021'
+    else:
+        header = f'{season} Season'
+        footer = ''
 
     stats = dict()
     for i in players:
@@ -127,11 +144,12 @@ def update_stats_summary(players, season):
                         html.Td(stats[player].home_runs)])
 
     layout = [
-        html.Br(),
+        html.H3(header),
         html.Table(
             [html.Tr([html.Th(col) for col in ['Player', 'AVG', 'OBP', 'SLG', 'GP', 'PA', 'AB', 'R', 'BB', 'SF', 'K', 'H', '1B', '2B', '3B', 'HR']]) ] +
             [stats_row(i) for i in stats.keys()]
         ),
+        html.H6(footer)
     ]
 
     return layout
@@ -145,7 +163,7 @@ def update_graph(season):
     if not season:
         return
 
-    season_players = db.get_player_list_for_season(season)
+    season_players = db.get_roster_for_season(season)
 
     stats = dict()
     for i in season_players:
@@ -169,20 +187,28 @@ def update_graph(season):
     df['Triples'] = [stats[i].triples for i in stats]
     df['Home Runs'] = [stats[i].home_runs for i in stats]
     layout = []
-    for s in df.columns[1:]:
+
+    for s in df.columns:
+        if s == 'Player':
+            continue
+        if season == 2021:
+            # remove missing data from 2021 season
+            if s == 'Slugging Percentage' or s == 'Singles' or s == 'Doubles' or s == 'Triples' or s == 'Home Runs':
+                continue
+
         if season == 'All':
-            chart_title = f'{s} - Top 10 Players All Time'
+            chart_title = f'{s} - Top 10 (All Time)'
         else:
-            chart_title = f'{s} - Top 10 Players for {season}'
+            chart_title = f'{s} - Top 10 ({season})'
         df = df.sort_values([s], ascending=False)
         if s == 'Batting Average' or s == 'On Base Percentage' or s == 'Slugging Percentage':
             text_format = ['%.3f'%(i) for i in df[s][:10]]
         else:
             text_format = [i for i in df[s][:10]]
         bargraph = go.Figure(layout={'title':chart_title}, 
-                                                 data=go.Bar(x=df['Player'][:10],
-                                                             y=df[s][:10],
-                                                             text=text_format))
+                             data=go.Bar(x=df['Player'][:10],
+                                         y=df[s][:10],
+                                         text=text_format))
         bargraph.update_layout(template="plotly_white", font={'size':16, 'family':"Calibri", 'color':"#000"})
         bargraph.update_traces(marker_color='#696969')
         layout.append(dcc.Graph(figure=bargraph))

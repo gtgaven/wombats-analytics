@@ -1,4 +1,4 @@
-#TODO this info should move to the database
+from database_connection import DbConnection
 
 ROSTERS = {
     "2021": ["Anna",
@@ -56,3 +56,13 @@ ROSTERS = {
             "Zach"
         ]
 }
+
+def add_roster(year):
+    db = DbConnection('root', 'winnie2', False)
+    db.verify_players_exist_in_database(ROSTERS[str(year)])
+    for p in ROSTERS[str(year)]:
+        print(f'adding {p} to {year} roster')
+        db.insert_roster_item(year, p)
+
+if __name__ == '__main__':
+    add_roster(2023)
