@@ -2,7 +2,24 @@ import csv
 import json
 from pathlib import Path
 from player import PlayerStats
-from metadata import ROSTERS
+
+ROSTERS = {
+    "2021": ["Anna",
+            "Brad",
+            "Brandon",
+            "Carol",
+            "Greg",
+            "Isaac",
+            "Jake",
+            "Jamila",
+            "Katie",
+            "Lance",
+            "Nate La",
+            "Phil",
+            "Ruthie",
+            "Ryan",
+            "Ted",
+            "Walt"]}
 
 class Game:
     def __init__(self, game_json_path, stats_csv_path):

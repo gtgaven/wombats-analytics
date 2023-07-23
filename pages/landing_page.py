@@ -77,13 +77,7 @@ nav_bar = dbc.NavbarSimple(
                 style={"color": "#000000"})
             ],
             style={"width": "250px", "color":"#fff", "padding-right": "20px"}
-        ),
-        html.Div([
-            dbc.Button('Raw Stats', color="dark", href="/raw")
-            ],
-            style={"height": "24px", "color":"#fff", "padding-right": "20px", "padding-top": "24px"}
         )
-        
     ],
     brand="West Building Wombats",
     brand_href="/",
@@ -113,13 +107,8 @@ def update_stats_summary(players, season):
 
     if season == "All":
         header = "All Time Stats"
-        footer = ''
-    elif season == 2021:
-        header = '2021 Season*'
-        footer = ' *no extra-base hits recorded in 2021'
     else:
         header = f'{season} Season'
-        footer = ''
 
     stats = dict()
     for i in players:
@@ -137,7 +126,7 @@ def update_stats_summary(players, season):
                         html.Td(stats[player].walks),
                         html.Td(stats[player].sac_flies),
                         html.Td(stats[player].strikeouts),
-                        html.Td(stats[player].hits()),
+                        html.Td(round(stats[player].hits(), 2)),
                         html.Td(stats[player].singles),
                         html.Td(stats[player].doubles),
                         html.Td(stats[player].triples),
@@ -148,8 +137,7 @@ def update_stats_summary(players, season):
         html.Table(
             [html.Tr([html.Th(col) for col in ['Player', 'AVG', 'OBP', 'SLG', 'GP', 'PA', 'AB', 'R', 'BB', 'SF', 'K', 'H', '1B', '2B', '3B', 'HR']]) ] +
             [stats_row(i) for i in stats.keys()]
-        ),
-        html.H6(footer)
+        )
     ]
 
     return layout
@@ -191,10 +179,6 @@ def update_graph(season):
     for s in df.columns:
         if s == 'Player':
             continue
-        if season == 2021:
-            # remove missing data from 2021 season
-            if s == 'Slugging Percentage' or s == 'Singles' or s == 'Doubles' or s == 'Triples' or s == 'Home Runs':
-                continue
 
         if season == 'All':
             chart_title = f'{s} - Top 10 (All Time)'
