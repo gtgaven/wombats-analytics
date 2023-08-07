@@ -14,7 +14,8 @@ dash.register_page(__name__, path='/')
 
 all_players = db.get_player_list()
 player_dropdown_list = all_players.copy()
-player_dropdown_list.insert(0, "The Average Wombat")
+player_dropdown_list.insert(0, "Mean Wombat")
+player_dropdown_list.insert(0, "Median Wombat")
 player_dropdown_list.insert(0, "Team Cumulative")
 
 all_seasons = db.get_seasons()
@@ -31,28 +32,43 @@ def get_cumulative_stats(player, season):
         seasons = [season]
         players = db.get_roster_for_season(season)
 
-    cumulative_stats = PlayerStats()
-    if player == 'Team Cumulative':
-        for p in all_players:
-            cumulative_stats += db.get_stats_for_player_in_seasons(p, seasons)
-    elif player == 'The Average Wombat':
-        for p in all_players:
-            cumulative_stats += db.get_stats_for_player_in_seasons(p, seasons)
-        average_wombat = PlayerStats(round(cumulative_stats.games_played/len(players), 2),
-                                     round(cumulative_stats.plate_appearances/len(players), 2),
-                                     round(cumulative_stats.runs/len(players), 2),
-                                     round(cumulative_stats.sac_flies/len(players), 2),
-                                     round(cumulative_stats.walks/len(players), 2),
-                                     round(cumulative_stats.strikeouts/len(players), 2),
-                                     round(cumulative_stats.singles/len(players), 2),
-                                     round(cumulative_stats.doubles/len(players), 2),
-                                     round(cumulative_stats.triples/len(players), 2),
-                                     round(cumulative_stats.home_runs/len(players), 2))
-        return average_wombat
-    else:
-        cumulative_stats += db.get_stats_for_player_in_seasons(player, seasons)
+    if player in players:
+        return db.get_stats_for_player_in_seasons(player, seasons)
 
-    return cumulative_stats
+    player_cumulative_stats = []
+    team_cumulative_stats = PlayerStats()
+    for p in players:
+        stats = db.get_stats_for_player_in_seasons(p, seasons)
+        player_cumulative_stats.append(stats)
+        team_cumulative_stats += stats
+    
+    if player == 'Team Cumulative':
+        return team_cumulative_stats
+    elif player == 'Mean Wombat':
+        return PlayerStats(round(team_cumulative_stats.games_played/len(players), 2),
+                           round(team_cumulative_stats.plate_appearances/len(players), 2),
+                           round(team_cumulative_stats.runs/len(players), 2),
+                           round(team_cumulative_stats.sac_flies/len(players), 2),
+                           round(team_cumulative_stats.walks/len(players), 2),
+                           round(team_cumulative_stats.strikeouts/len(players), 2),
+                           round(team_cumulative_stats.singles/len(players), 2),
+                           round(team_cumulative_stats.doubles/len(players), 2),
+                           round(team_cumulative_stats.triples/len(players), 2),
+                           round(team_cumulative_stats.home_runs/len(players), 2))
+    elif player == 'Median Wombat':
+        middle_index = int(len(player_cumulative_stats) / 2) - 1
+        return PlayerStats(sorted(player_cumulative_stats, key=lambda x: x.games_played)[middle_index].games_played,
+                           sorted(player_cumulative_stats, key=lambda x: x.plate_appearances)[middle_index].plate_appearances,
+                           sorted(player_cumulative_stats, key=lambda x: x.runs)[middle_index].runs,
+                           sorted(player_cumulative_stats, key=lambda x: x.sac_flies)[middle_index].sac_flies,
+                           sorted(player_cumulative_stats, key=lambda x: x.walks)[middle_index].walks,
+                           sorted(player_cumulative_stats, key=lambda x: x.strikeouts)[middle_index].strikeouts,
+                           sorted(player_cumulative_stats, key=lambda x: x.singles)[middle_index].singles,
+                           sorted(player_cumulative_stats, key=lambda x: x.doubles)[middle_index].doubles,
+                           sorted(player_cumulative_stats, key=lambda x: x.triples)[middle_index].triples,
+                           sorted(player_cumulative_stats, key=lambda x: x.home_runs)[middle_index].home_runs)
+
+    raise RuntimeError(f'unknown player {player}')
 
 
 nav_bar = dbc.NavbarSimple(
@@ -72,7 +88,7 @@ nav_bar = dbc.NavbarSimple(
             dcc.Dropdown(
                 options=player_dropdown_list,
                 id='player-select',
-                value=['Team Cumulative', 'The Average Wombat'],
+                value=['Team Cumulative', 'Median Wombat', 'Mean Wombat'],
                 multi=True,
                 style={"color": "#000000"})
             ],

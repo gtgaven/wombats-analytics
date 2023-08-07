@@ -19,7 +19,29 @@ ROSTERS = {
             "Ruthie",
             "Ryan",
             "Ted",
-            "Walt"]}
+            "Walt"],
+    "2023": ["Brandon",
+"Cam",     
+"Carol",   
+"Chad",    
+"Greg",    
+"Hunter",  
+"Ian",     
+"Josh",    
+"Luke",    
+"Moises",  
+"Nate Lo", 
+"Nate Ly", 
+"Paul",    
+"Phil",    
+"Ryan",    
+"Ron",     
+"Shane",   
+"Steve",   
+"Ted",     
+"Zach"    ]
+
+        }
 
 class Game:
     def __init__(self, game_json_path, stats_csv_path):
