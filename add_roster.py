@@ -65,4 +65,6 @@ def add_roster(year):
         db.insert_roster_item(year, p)
 
 if __name__ == '__main__':
+    add_roster(2021)
+    add_roster(2022)
     add_roster(2023)
