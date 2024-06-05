@@ -66,6 +66,22 @@
             "op_score": 19,
             "score": 4,
             "player_count": 10
+        },
+        {
+            "was_home": false,
+            "op": "Troy Hill Wango Tangoes",
+            "op_score": 14,
+            "score": 2,
+            "player_count": 10,
+            "game_num": 7
+        },
+        {
+            "was_home": true,
+            "op": "Troy Hill Wango Tangoes",
+            "op_score": 14,
+            "score": 19,
+            "player_count": 9,
+            "game_num": 8
         } 
     ]
 
