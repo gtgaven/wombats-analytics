@@ -1,0 +1,43 @@
+{
+    "version": "1.0.0",
+    "team": "West Building Wombats",
+    "year": 2024,
+    "roster": ["Carol",
+            "Chad",
+            "Fahad",
+            "Greg",
+            "Hunter",
+            "Ian",
+            "Jack",
+            "James",
+            "Justin",
+            "Keith",
+            "Lamo",
+            "Michael",
+            "Nate Lo",
+            "Phil",
+            "Ron",
+            "Ryan",
+            "Shane",
+            "Steve",
+            "Ted",
+            "Zach"
+        ],
+    "games": [
+        {
+            "was_home": true,
+            "op": "Troy Hill Wango Tangoes",
+            "op_score": 19,
+            "score": 12,
+            "player_count": 9
+        },
+        {
+            "was_home": false,
+            "op": "Troy Hill Wango Tangoes",
+            "op_score": 15,
+            "score": 13,
+            "player_count": 9
+        }
+    ]
+
+}
