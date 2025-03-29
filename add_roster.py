@@ -54,17 +54,47 @@ ROSTERS = {
             "Steve",
             "Ted",
             "Zach"
+        ],
+    "2024": ["Carol",
+            "Chad",
+            "Fahad",
+            "Greg",
+            "Hunter",
+            "Ian",
+            "Jack",
+            "James",
+            "Justin",
+            "Keith",
+            "Lamo",
+            "Nate Lo",
+            "Phil",
+            "Ron",
+            "Ryan",
+            "Shane",
+            "Steve",
+            "Ted",
+            "Zach"
         ]
 }
 
 def add_roster(year):
-    db = DbConnection('root', 'winnie2', False)
+    db = DbConnection('root', 'winnie2', False)#change to true if running for real
     db.verify_players_exist_in_database(ROSTERS[str(year)])
     for p in ROSTERS[str(year)]:
         print(f'adding {p} to {year} roster')
         db.insert_roster_item(year, p)
 
+
+def add_new_player(player_name):
+    db = DbConnection('root', 'winnie2', False)#change to true if running for real
+    db.insert_player(player_name)
+
 if __name__ == '__main__':
-    add_roster(2021)
-    add_roster(2022)
-    add_roster(2023)
+    pass
+    #add_roster(2021)
+    #add_roster(2022)
+    #add_roster(2023)
+    #for p in ["Fahad", "Jack", "James", "Justin", "Keith", "Lamo", "Michael"]:
+        #add_new_player(p)
+
+    #add_roster(2024)

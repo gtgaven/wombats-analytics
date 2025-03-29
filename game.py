@@ -57,6 +57,27 @@ ROSTERS = {
             "Steve",
             "Ted",
             "Zach"
+        ],
+    "2024": ["Carol",
+            "Chad",
+            "Fahad",
+            "Greg",
+            "Hunter",
+            "Ian",
+            "Jack",
+            "James",
+            "Justin",
+            "Keith",
+            "Lamo",
+            "Michael",
+            "Nate Lo",
+            "Phil",
+            "Ron",
+            "Ryan",
+            "Shane",
+            "Steve",
+            "Ted",
+            "Zach"
         ]
 }
 
