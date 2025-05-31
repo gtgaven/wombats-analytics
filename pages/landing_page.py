@@ -23,54 +23,6 @@ season_dropdown_list = all_seasons.copy()
 season_dropdown_list.insert(0, "All")
 
 
-def get_cumulative_stats(player, season):
-    players = []
-    if season == 'All':
-        seasons = all_seasons
-        players = all_players
-    else:
-        seasons = [season]
-        players = db.get_roster_for_season(season)
-
-    if player in players:
-        return db.get_stats_for_player_in_seasons(player, seasons)
-
-    player_cumulative_stats = []
-    team_cumulative_stats = PlayerStats()
-    for p in players:
-        stats = db.get_stats_for_player_in_seasons(p, seasons)
-        player_cumulative_stats.append(stats)
-        team_cumulative_stats += stats
-    
-    if player == 'Team Cumulative':
-        return team_cumulative_stats
-    elif player == 'Mean Wombat':
-        return PlayerStats(round(team_cumulative_stats.games_played/len(players), 2),
-                           round(team_cumulative_stats.plate_appearances/len(players), 2),
-                           round(team_cumulative_stats.runs/len(players), 2),
-                           round(team_cumulative_stats.sac_flies/len(players), 2),
-                           round(team_cumulative_stats.walks/len(players), 2),
-                           round(team_cumulative_stats.strikeouts/len(players), 2),
-                           round(team_cumulative_stats.singles/len(players), 2),
-                           round(team_cumulative_stats.doubles/len(players), 2),
-                           round(team_cumulative_stats.triples/len(players), 2),
-                           round(team_cumulative_stats.home_runs/len(players), 2))
-    elif player == 'Median Wombat':
-        middle_index = int(len(player_cumulative_stats) / 2) - 1
-        return PlayerStats(sorted(player_cumulative_stats, key=lambda x: x.games_played)[middle_index].games_played,
-                           sorted(player_cumulative_stats, key=lambda x: x.plate_appearances)[middle_index].plate_appearances,
-                           sorted(player_cumulative_stats, key=lambda x: x.runs)[middle_index].runs,
-                           sorted(player_cumulative_stats, key=lambda x: x.sac_flies)[middle_index].sac_flies,
-                           sorted(player_cumulative_stats, key=lambda x: x.walks)[middle_index].walks,
-                           sorted(player_cumulative_stats, key=lambda x: x.strikeouts)[middle_index].strikeouts,
-                           sorted(player_cumulative_stats, key=lambda x: x.singles)[middle_index].singles,
-                           sorted(player_cumulative_stats, key=lambda x: x.doubles)[middle_index].doubles,
-                           sorted(player_cumulative_stats, key=lambda x: x.triples)[middle_index].triples,
-                           sorted(player_cumulative_stats, key=lambda x: x.home_runs)[middle_index].home_runs)
-
-    raise RuntimeError(f'unknown player {player}')
-
-
 nav_bar = dbc.NavbarSimple(
     children=[
         html.Div([
@@ -128,7 +80,7 @@ def update_stats_summary(players, season):
 
     stats = dict()
     for i in players:
-        stats[i] = get_cumulative_stats(i, season)
+        stats[i] = db.get_cumulative_stats(i, season)
 
     def stats_row(player):
         return html.Tr([html.Td(player),
@@ -171,7 +123,7 @@ def update_graph(season):
 
     stats = dict()
     for i in season_players:
-        stats[i] = get_cumulative_stats(i, season)
+        stats[i] = db.get_cumulative_stats(i, season)
 
     df = pd.DataFrame()
     df['Player'] = stats.keys()
