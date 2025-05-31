@@ -24,7 +24,7 @@ def layout(**kwargs):
                 value=player,
                 style={"color": "#000000"})
             ],
-            style={"width": "250px", "color":"#fff", "padding-right": "20px"}
+            style={"width": "250px", "color":"#fff", "padding-left": "20px"}
         ),
         html.Div(id='player-profile-pane')
     ])
