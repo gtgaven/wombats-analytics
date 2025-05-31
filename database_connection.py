@@ -1,13 +1,31 @@
 import threading
+import json
 from mysql import connector
 from player import PlayerStats
+
 
 class DbConnection():
 
     _db_lock = threading.Lock()
+    DB_CONFIG_FILENAME = "config/.db.json"
+    DB_HOSTNAME = "unknown"
+    DB_DATABASE = "unknown"
+    DB_USERNAME = "unknown"
+    DB_PASSWORD = "unknown"
 
-    def __init__(self, username, password, commit_changes=False):
-        self.db = connector.connect(host='localhost', database='softball', user=username, password=password)
+    try:
+        with open(DB_CONFIG_FILENAME) as cfg:
+            db_config = json.load(cfg)
+            DB_HOSTNAME = db_config["host"]
+            DB_DATABASE = db_config["database"]
+            DB_USERNAME = db_config["username"]
+            DB_PASSWORD = db_config["password"]
+    except Exception as e:
+        raise RuntimeError(f"failed to read db config file {DB_CONFIG_FILENAME=}, reason {e}")
+
+    def __init__(self, commit_changes=False):
+
+        self.db = connector.connect(host=DbConnection.DB_HOSTNAME, database=DbConnection.DB_DATABASE, user=DbConnection.DB_USERNAME, password=DbConnection.DB_PASSWORD)
         self.commit_changes = commit_changes
         self.cursor = self.db.cursor()
 

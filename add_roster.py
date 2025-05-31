@@ -78,7 +78,7 @@ ROSTERS = {
 }
 
 def add_roster(year):
-    db = DbConnection('root', 'winnie2', False)#change to true if running for real
+    db = DbConnection(False)#change to true if running for real
     db.verify_players_exist_in_database(ROSTERS[str(year)])
     for p in ROSTERS[str(year)]:
         print(f'adding {p} to {year} roster')
@@ -86,7 +86,7 @@ def add_roster(year):
 
 
 def add_new_player(player_name):
-    db = DbConnection('root', 'winnie2', False)#change to true if running for real
+    db = DbConnection(False)#change to true if running for real
     db.insert_player(player_name)
 
 if __name__ == '__main__':

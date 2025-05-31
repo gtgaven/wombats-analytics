@@ -3,7 +3,7 @@ from dash import html, dcc, Input, Output, callback
 from database_connection import DbConnection
 import dash_bootstrap_components as dbc
 
-db = DbConnection('softball_readonly', 'softballrules!')
+db = DbConnection()
 
 dash.register_page(__name__, path='/raw')
 

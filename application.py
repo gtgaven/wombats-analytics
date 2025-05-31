@@ -15,4 +15,4 @@ def get_app():
 
 
 if __name__ == '__main__':
-    app.run("192.168.1.189", 8080, debug=True)
+    app.run("localhost", 8080, debug=True)

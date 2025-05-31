@@ -8,7 +8,7 @@ import pandas as pd
 import plotly.express as px
 from database_connection import DbConnection
 
-db = DbConnection('softball_readonly', 'softballrules!')
+db = DbConnection()
 
 dash.register_page(__name__, path='/')
 
