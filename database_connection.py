@@ -246,7 +246,7 @@ class DbConnection():
             player_cumulative_stats.append(stats)
             team_cumulative_stats += stats
         
-        if player == 'Team Cumulative':
+        if player == 'Cumulative':
             return team_cumulative_stats
         elif player == 'Mean Wombat':
             return PlayerStats(round(team_cumulative_stats.games_played/len(players), 2),

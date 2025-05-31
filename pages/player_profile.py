@@ -2,58 +2,46 @@ import dash
 from dash import html, dcc, Input, Output, callback
 from database_connection import DbConnection
 import dash_bootstrap_components as dbc
+from nav_bar import get_nav_bar
 
 db = DbConnection()
 
-dash.register_page(__name__, path='/profile')
+dash.register_page(__name__, path='/player')
 
 all_players = db.get_player_list()
 
-def get_player_profile_bar(player):
-    player_profile_bar = dbc.NavbarSimple(
-        children=[
-            html.Div([
-                'Player:',
-                dcc.Dropdown(
-                    options=all_players,
-                    id='player-profile-select',
-                    multi=False,
-                    value=player,
-                    style={"color": "#000000"})
-                ],
-                style={"width": "250px", "color":"#fff", "padding-right": "20px"}
-            ),
-        ],
-        brand="West Building Wombats",
-        brand_href="/",
-        color="#696969",
-        dark=True
-    )
-
-    return player_profile_bar
-
-
 def layout(**kwargs):
-    player = kwargs.get("player", None)
-
+    player = kwargs.get("name", None)
     return html.Div([
-        get_player_profile_bar(player),
-        
+        get_nav_bar(),
+        html.Div([
+            'Player:',
+            dcc.Dropdown(
+                placeholder="Select a player",
+                options=all_players,
+                id='player-profile-select',
+                multi=False,
+                value=player,
+                style={"color": "#000000"})
+            ],
+            style={"width": "250px", "color":"#fff", "padding-right": "20px"}
+        ),
         html.Div(id='player-profile-pane')
     ])
 
 
 @callback(
     Output(component_id='player-profile-pane', component_property='children'),
-    Input(component_id='player-profile-select', component_property='value')
+    Input(component_id='player-profile-select', component_property='value'),
+    Input(component_id='season-select', component_property='value')
 )
-def update_player_profile(player):
+def update_player_profile(player, season):
     if not player:
         return
     
     layout = []
 
-    all_time_stats = db.get_cumulative_stats(player, "All")
+    all_time_stats = db.get_cumulative_stats(player, season)
 
     avg_table = html.Table([
         html.Tr([html.Th(col) for col in ['AVG', 'OBP', 'SLG']]),
@@ -97,12 +85,10 @@ def update_player_profile(player):
     ])
 
     main_profile_pane = html.Div([
-        html.H2(player),
         html.Table([
-            html.Tr([
-                html.Td(html.Img(src="../assets/pic.png", alt='image')),
-                html.Td(main_player_stats_table)
-            ])
+            html.Tr(html.Th(player)),
+            html.Tr(html.Td(html.Img(src="../assets/pic.png", alt='image'))),
+            html.Tr(html.Td(main_player_stats_table))
         ])
     ])
     layout.append(main_profile_pane)
