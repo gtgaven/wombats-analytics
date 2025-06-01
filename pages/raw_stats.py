@@ -1,10 +1,7 @@
 import dash
 from dash import html, dcc, Input, Output, callback
-from database_connection import DbConnection
 import dash_bootstrap_components as dbc
-from nav_bar import get_nav_bar
-
-db = DbConnection()
+from frontend_common import get_nav_bar, db
 
 dash.register_page(__name__, path='/raw-data')
 

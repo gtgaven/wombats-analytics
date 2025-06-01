@@ -6,10 +6,7 @@ import plotly.graph_objs as go
 from dash_bootstrap_components._components.Container import Container
 import pandas as pd
 import plotly.express as px
-from database_connection import DbConnection
-from nav_bar import get_nav_bar
-
-db = DbConnection()
+from frontend_common import get_nav_bar, db
 
 dash.register_page(__name__, path='/')
 
@@ -28,24 +25,24 @@ def update_stats_summary(season):
         return
 
     if season == "All":
-        team_header = "Wombats - All Time"
-        player_header = "Player Stats - All Time"
+        team_header = "Team - All Time"
+        player_header = "Players - All Time"
     else:
-        team_header = f'Wombats - {season} Season'
-        player_header = f'Player Stats - {season} Season'
+        team_header = f'Team - {season} Season'
+        player_header = f'Players - {season} Season'
 
     stats = dict()
     for i in ['Cumulative', 'Median Wombat', 'Mean Wombat']:
         stats[i] = db.get_cumulative_stats(i, season)
 
     def stats_avg_row(player):
-        return html.Tr([html.Td(player),
+        return html.Tr([html.Td(player, style={"text-align": "left"}),
                         html.Td('%.3f'%(stats[player].avg())),
                         html.Td('%.3f'%(stats[player].obp())),
                         html.Td('%.3f'%(stats[player].slg()))])
 
     def stats_batting_row(player):
-        return html.Tr([html.Td(player),
+        return html.Tr([html.Td(player, style={"text-align": "left"}),
                         html.Td(round(stats[player].hits(), 2)),
                         html.Td(stats[player].runs),
                         html.Td(stats[player].singles),
@@ -54,7 +51,7 @@ def update_stats_summary(season):
                         html.Td(stats[player].home_runs)])
 
     def stats_misc_row(player):
-        return html.Tr([html.Td(player),
+        return html.Tr([html.Td(player, style={"text-align": "left"}),
                         html.Td(stats[player].games_played),
                         html.Td(round(stats[player].at_bats(), 0)), # round to 0 needed for 'average wombat'
                         html.Td(stats[player].plate_appearances),

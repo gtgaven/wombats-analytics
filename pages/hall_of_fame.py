@@ -6,10 +6,7 @@ import plotly.graph_objs as go
 from dash_bootstrap_components._components.Container import Container
 import pandas as pd
 import plotly.express as px
-from database_connection import DbConnection
-from nav_bar import get_nav_bar
-
-db = DbConnection()
+from frontend_common import get_nav_bar, db
 
 dash.register_page(__name__, path='/hall-of-fame')
 
