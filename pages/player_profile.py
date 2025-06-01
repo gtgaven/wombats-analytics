@@ -84,9 +84,14 @@ def update_player_profile(player, season):
         html.Tr(misc_table)
     ])
 
+    if season == "All":
+        header = f"{player} - Career"
+    else:
+        header = f"{player} - {season} Season"
+
     main_profile_pane = html.Div([
         html.Table([
-            html.Tr(html.Th(player)),
+            html.Tr(html.Th(header)),
             html.Tr(html.Td(html.Img(src="../assets/pic.png", alt='image'))),
             html.Tr(html.Td(main_player_stats_table))
         ])
