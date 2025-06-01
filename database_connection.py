@@ -138,7 +138,10 @@ class DbConnection():
     def get_game_ids_in_season(self, year):
         DbConnection._db_lock.acquire()
         try:
-            self.cursor.execute(f'SELECT id FROM game WHERE year={year};')
+            if year == "All":
+                self.cursor.execute(f'SELECT id FROM game;')
+            else:
+                self.cursor.execute(f'SELECT id FROM game WHERE year={year};')
             game_ids = self.cursor.fetchall()
         except Exception as e:
             raise e
@@ -280,11 +283,12 @@ class DbConnection():
     def get_raw_stats_from_game_id(self, game_id):
         DbConnection._db_lock.acquire()
         try:
-            self.cursor.execute(f'SELECT gamenum, opponent, washome FROM game WHERE id={game_id};')
+            self.cursor.execute(f'SELECT gamenum, opponent, opponentscore, washome FROM game WHERE id={game_id};')
             results = self.cursor.fetchall()
             game_num = results[0][0]
             opponent = results[0][1]
-            was_home = results[0][2]
+            opponentscore = results[0][2]
+            was_home = results[0][3]
             
             self.cursor.execute(f'''SELECT name, plateappearances, runs, sacflies, walks, strikeouts, singles, doubles, triples, homeruns 
                                     FROM playerstat
@@ -297,7 +301,7 @@ class DbConnection():
         finally:
             DbConnection._db_lock.release()
 
-        return {'game_num': game_num, 'opponent': opponent, 'was_home': was_home, 'stats': game_stats}
+        return {'game_num': game_num, 'opponent': opponent, 'opponentscore': opponentscore, 'was_home': was_home, 'stats': game_stats}
 
     def get_roster_for_season(self, season):
         if season == 'All':

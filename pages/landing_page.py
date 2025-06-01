@@ -66,17 +66,34 @@ def update_stats_summary(season):
     gp_away = db.get_num_games(season, False)
     gp_any = db.get_num_games(season, "Any")
 
-    rf_home = 0 #TODO
-    rf_away = 0 #TODO
+    rf_home = 0
+    rf_away = 0
     rf_any = stats["Cumulative"].runs
+
+    w_home = 0
+    w_away = 0
+
+    for game_id in db.get_game_ids_in_season(season):
+        raw_stats = db.get_raw_stats_from_game_id(game_id)
+        runs_for = sum([raw_stats["stats"][x][2] for x in range(0, len(raw_stats["stats"]))])
+        win = runs_for > raw_stats["opponentscore"]
+        if raw_stats["was_home"]:
+            rf_home += runs_for
+            if win:
+                w_home += 1
+        else:
+            rf_away += runs_for
+            if win:
+                w_away += 1
+
+    w_any = w_home + w_away
+
+    if rf_any != rf_home + rf_away:
+       raise RuntimeError("sanity validation failed for run calculation")
 
     ra_home = db.get_runs_against(season, True)
     ra_away = db.get_runs_against(season, False)
     ra_any = db.get_runs_against(season, "Any")
-
-    w_home = 0 #TODO
-    w_away = 0 #TODO
-    w_any = 0 # TODO
 
     team_stats_table = html.Table([
         html.Tr([html.Th(i) for i in ["", "GP", "W", "L", "%", "RF", "RA", "Diff"]]),
@@ -85,7 +102,7 @@ def update_stats_summary(season):
             html.Td(gp_home),
             html.Td(w_home),
             html.Td(gp_home - w_home),
-            html.Td(w_home / (gp_home - w_home)),
+            html.Td('%.3f'%(w_home / gp_home)),
             html.Td(rf_home),
             html.Td(ra_home),
             html.Td(rf_home - ra_home),
@@ -95,7 +112,7 @@ def update_stats_summary(season):
             html.Td(gp_away),
             html.Td(w_away),
             html.Td(gp_away - w_away),
-            html.Td(w_away / (gp_away - w_away)),
+            html.Td('%.3f'%(w_away / gp_away)),
             html.Td(rf_away),
             html.Td(ra_away),
             html.Td(rf_away - ra_away),
@@ -105,7 +122,7 @@ def update_stats_summary(season):
             html.Td(gp_any),
             html.Td(w_any),
             html.Td(gp_any - w_any),
-            html.Td(w_any / (gp_any - w_any)),
+            html.Td('%.3f'%(w_any / gp_any)),
             html.Td(rf_any),
             html.Td(ra_any),
             html.Td(rf_any - ra_any),
