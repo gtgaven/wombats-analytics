@@ -6,7 +6,6 @@ from player import PlayerStats
 
 class DbConnection():
 
-    _db_lock = threading.Lock()
     DB_CONFIG_FILENAME = "config/.db.json"
     DB_HOSTNAME = "unknown"
     DB_DATABASE = "unknown"
@@ -30,17 +29,11 @@ class DbConnection():
         self.cursor = self.db.cursor()
 
     def _execute_command(self, command):
-        DbConnection._db_lock.acquire()
-        try:
-            if self.commit_changes:
-                self.cursor.execute(command)
-                self.db.commit()
-            else:
-                print(f"DRYRUN: would have executed {command}")
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        if self.commit_changes:
+            self.cursor.execute(command)
+            self.db.commit()
+        else:
+            print(f"DRYRUN: would have executed {command}")
 
     def _insert_player_stat(self, player_id, game_id, stat):
         insert_command = f'''INSERT INTO playerstat (player, 
@@ -90,14 +83,8 @@ class DbConnection():
                     INNER JOIN game ON playerstat.game=game.id
                     WHERE playerstat.player={id} AND ('''
         query += and_str
-        DbConnection._db_lock.acquire()
-        try:
-            self.cursor.execute(query)
-            query_results = self.cursor.fetchall()
-        except Exception as e:
-            raise e 
-        finally:
-            DbConnection._db_lock.release()
+        self.cursor.execute(query)
+        query_results = self.cursor.fetchall()
 
         stats = PlayerStats()
         for p in query_results:
@@ -109,7 +96,6 @@ class DbConnection():
         return self.get_stats_for_player_in_seasons(playername, self.get_seasons())
 
     def get_all_stats(self):
-        DbConnection._db_lock.acquire()
         query = f'''SELECT * FROM playerstat
                     INNER JOIN game ON playerstat.game=game.id
                     INNER JOIN player ON playerstat.player=player.id;'''
@@ -118,14 +104,8 @@ class DbConnection():
         return playerstats
 
     def get_game_id(self, team, year, gamenum):
-        DbConnection._db_lock.acquire()
-        try:
-            self.cursor.execute(f'SELECT id, team, year, gamenum FROM game WHERE team = "{team}" AND year = {year} AND gamenum = {gamenum};')
-            games = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        self.cursor.execute(f'SELECT id, team, year, gamenum FROM game WHERE team = "{team}" AND year = {year} AND gamenum = {gamenum};')
+        games = self.cursor.fetchall()
 
         if len(games) > 1:
             raise RuntimeError(f'multiple games returned for {team}, {year}, #{gamenum}')
@@ -136,33 +116,21 @@ class DbConnection():
         return games[0][0]
 
     def get_game_ids_in_season(self, year):
-        DbConnection._db_lock.acquire()
-        try:
-            if year == "All":
-                self.cursor.execute(f'SELECT id FROM game;')
-            else:
-                self.cursor.execute(f'SELECT id FROM game WHERE year={year};')
-            game_ids = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        if year == "All":
+            self.cursor.execute(f'SELECT id FROM game;')
+        else:
+            self.cursor.execute(f'SELECT id FROM game WHERE year={year};')
+        game_ids = self.cursor.fetchall()
 
         return [i[0] for i in game_ids]
 
     def get_num_games(self, year, home):
         if home == "Any":
-            DbConnection._db_lock.acquire()
-            try:
-                if year == "All":
-                    self.cursor.execute(f'SELECT COUNT(id) FROM game;')
-                else:
-                    self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE year={year};')
-                count = self.cursor.fetchall()
-            except Exception as e:
-                raise e
-            finally:
-                DbConnection._db_lock.release()
+            if year == "All":
+                self.cursor.execute(f'SELECT COUNT(id) FROM game;')
+            else:
+                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE year={year};')
+            count = self.cursor.fetchall()
 
             return count[0][0]
 
@@ -173,48 +141,30 @@ class DbConnection():
 
 
     def _get_num_home_games(self, year):
-        DbConnection._db_lock.acquire()
-        try:
-            if year == "All":
-                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE washome=1;')
-            else:
-                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE year={year} and washome=1;')
-            count = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        if year == "All":
+            self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE washome=1;')
+        else:
+            self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE year={year} and washome=1;')
+        count = self.cursor.fetchall()
 
         return count[0][0]
 
     def _get_num_away_games(self, year):
-        DbConnection._db_lock.acquire()
-        try:
-            if year == "All":
-                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE washome=0;')
-            else:
-                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE year={year} and washome=0;')
-            count = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        if year == "All":
+            self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE washome=0;')
+        else:
+            self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE year={year} and washome=0;')
+        count = self.cursor.fetchall()
 
         return count[0][0]
 
     def get_runs_against(self, year, home):
         if home == "Any":
-            DbConnection._db_lock.acquire()
-            try:
-                if year == "All":
-                    self.cursor.execute(f'SELECT SUM(opponentscore) FROM game;')
-                else:
-                    self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE year={year};')
-                count = self.cursor.fetchall()
-            except Exception as e:
-                raise e
-            finally:
-                DbConnection._db_lock.release()
+            if year == "All":
+                self.cursor.execute(f'SELECT SUM(opponentscore) FROM game;')
+            else:
+                self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE year={year};')
+            count = self.cursor.fetchall()
 
             return count[0][0]
 
@@ -224,82 +174,51 @@ class DbConnection():
             return self._get_runs_against_away(year)
 
     def _get_runs_against_home(self, year):
-        DbConnection._db_lock.acquire()
-        try:
-            if year == "All":
-                self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE washome=1;')
-            else:
-                self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE year={year} and washome=1;')
-            count = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        if year == "All":
+            self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE washome=1;')
+        else:
+            self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE year={year} and washome=1;')
+        count = self.cursor.fetchall()
 
         return count[0][0]
 
     def _get_runs_against_away(self, year):
-        DbConnection._db_lock.acquire()
-        try:
-            if year == "All":
-                self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE washome=0;')
-            else:
-                self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE year={year} and washome=0;')
-            count = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        if year == "All":
+            self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE washome=0;')
+        else:
+            self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE year={year} and washome=0;')
+        count = self.cursor.fetchall()
 
         return count[0][0]
 
     def get_player_id(self, playername):
-        DbConnection._db_lock.acquire()
-        try:
-            self.cursor.execute(f'SELECT id FROM player WHERE name="{playername}";')
-            ids = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
-
+        self.cursor.execute(f'SELECT id FROM player WHERE name="{playername}";')
+        ids = self.cursor.fetchall()
         if len(ids) != 1:
                 raise RuntimeError(f'player with name {playername} not found in DB, len {len(ids)}')
         return ids[0][0]
 
     def get_player_list(self):
-        DbConnection._db_lock.acquire()
-        try:
-            self.cursor.execute('SELECT name FROM player;')
-            query_result = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        self.cursor.execute('SELECT name FROM player;')
+        query_result = self.cursor.fetchall()
 
         names = [n[0] for n in query_result]
         return names
 
     def get_raw_stats_from_game_id(self, game_id):
-        DbConnection._db_lock.acquire()
-        try:
-            self.cursor.execute(f'SELECT gamenum, opponent, opponentscore, washome FROM game WHERE id={game_id};')
-            results = self.cursor.fetchall()
-            game_num = results[0][0]
-            opponent = results[0][1]
-            opponentscore = results[0][2]
-            was_home = results[0][3]
-            
-            self.cursor.execute(f'''SELECT name, plateappearances, runs, sacflies, walks, strikeouts, singles, doubles, triples, homeruns 
-                                    FROM playerstat
-                                    INNER JOIN game ON playerstat.game=game.id
-                                    INNER JOIN player ON playerstat.player=player.id
-                                    WHERE playerstat.game={game_id};''')
-            game_stats = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        self.cursor.execute(f'SELECT gamenum, opponent, opponentscore, washome FROM game WHERE id={game_id};')
+        results = self.cursor.fetchall()
+        game_num = results[0][0]
+        opponent = results[0][1]
+        opponentscore = results[0][2]
+        was_home = results[0][3]
+        
+        self.cursor.execute(f'''SELECT name, plateappearances, runs, sacflies, walks, strikeouts, singles, doubles, triples, homeruns 
+                                FROM playerstat
+                                INNER JOIN game ON playerstat.game=game.id
+                                INNER JOIN player ON playerstat.player=player.id
+                                WHERE playerstat.game={game_id};''')
+        game_stats = self.cursor.fetchall()
 
         return {'game_num': game_num, 'opponent': opponent, 'opponentscore': opponentscore, 'was_home': was_home, 'stats': game_stats}
 
@@ -307,29 +226,17 @@ class DbConnection():
         if season == 'All':
             return self.get_player_list()
 
-        DbConnection._db_lock.acquire()
-        try:
-            self.cursor.execute(f'''SELECT player, name FROM roster
-                                    INNER JOIN player ON roster.player=player.id
-                                    WHERE roster.year={season};''')
-            query_result = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        self.cursor.execute(f'''SELECT player, name FROM roster
+                                INNER JOIN player ON roster.player=player.id
+                                WHERE roster.year={season};''')
+        query_result = self.cursor.fetchall()
 
         names = [n[1] for n in query_result]
         return names
 
     def get_seasons(self):
-        DbConnection._db_lock.acquire()
-        try:
-            self.cursor.execute('SELECT DISTINCT year FROM roster;')
-            query_result = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        self.cursor.execute('SELECT DISTINCT year FROM roster;')
+        query_result = self.cursor.fetchall()
 
         seasons = [n[0] for n in query_result]
         return seasons
@@ -405,17 +312,11 @@ class DbConnection():
 
     def insert_roster_item(self, year, player_name):
         pid = self.get_player_id(player_name)
-        DbConnection._db_lock.acquire()
-        try:
-            self.cursor.execute(f'SELECT player FROM roster WHERE player={pid} AND year={year};')
-            players = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-        finally:
-            DbConnection._db_lock.release()
+        self.cursor.execute(f'SELECT player FROM roster WHERE player={pid} AND year={year};')
+        players = self.cursor.fetchall()
 
         if len(players) != 0:
-                raise RuntimeError(f'{player_name} already exists in roster for year {year}')
+            raise RuntimeError(f'{player_name} already exists in roster for year {year}')
 
         self._execute_command(f'INSERT INTO roster (player, year) VALUES ({pid}, {year});')
 

@@ -136,20 +136,15 @@ def update_stats_summary(season):
         html.Table([
             html.Tr([html.Th(col) for col in ['', 'AVG', 'OBP', 'SLG']]),
             *[stats_avg_row(i) for i in stats.keys()]
-        ],
-        style={"font-size": "large"}),
+        ]),
         html.Table([
             html.Tr([html.Th(col) for col in ['', 'H', 'R', '1B', '2B', '3B', 'HR']]) ,
             *[stats_batting_row(i) for i in stats.keys()]
-        ],
-        style={"font-size": "small"}),
-
-            
+        ]),   
         html.Table([
             html.Tr([html.Th(col) for col in ['', 'GP', 'AB', 'PA', 'BB', 'SF', 'K']]),
             *[stats_misc_row(i) for i in stats.keys()]
-        ],
-        style={"font-size": "small"})
+        ])
     ]
 
     return layout
