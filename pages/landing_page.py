@@ -64,36 +64,22 @@ def update_stats_summary(season):
 
     gp_home = db.get_num_games(season, True)
     gp_away = db.get_num_games(season, False)
-    gp_any = db.get_num_games(season, "Any")
+    gp_any = gp_home + gp_away
 
-    rf_home = 0
-    rf_away = 0
-    rf_any = stats["Cumulative"].runs
+    rf_home = db.get_runs_in_year(True, season, True)
+    rf_away = db.get_runs_in_year(True, season, False)
+    rf_any = rf_home + rf_away
 
-    w_home = 0
-    w_away = 0
+    ra_home = db.get_runs_in_year(False, season, True)
+    ra_away = db.get_runs_in_year(False, season, False)
+    ra_any = ra_home + ra_away
 
-    for game_id in db.get_game_ids_in_season(season):
-        raw_stats = db.get_raw_stats_from_game_id(game_id)
-        runs_for = sum([raw_stats["stats"][x][2] for x in range(0, len(raw_stats["stats"]))])
-        win = runs_for > raw_stats["opponentscore"]
-        if raw_stats["was_home"]:
-            rf_home += runs_for
-            if win:
-                w_home += 1
-        else:
-            rf_away += runs_for
-            if win:
-                w_away += 1
-
+    w_home = db.get_wins_in_year(season, True)
+    w_away = db.get_wins_in_year(season, False)
     w_any = w_home + w_away
 
-    if rf_any != rf_home + rf_away:
-       raise RuntimeError("sanity validation failed for run calculation")
-
-    ra_home = db.get_runs_against(season, True)
-    ra_away = db.get_runs_against(season, False)
-    ra_any = db.get_runs_against(season, "Any")
+    if rf_any != stats["Cumulative"].runs:
+       raise RuntimeError("sanity validation failed for runs-for calculation")
 
     team_stats_table = html.Table([
         html.Tr([html.Th(i) for i in ["", "GP", "W", "L", "%", "RF", "RA", "Diff"]]),

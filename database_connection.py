@@ -158,37 +158,56 @@ class DbConnection():
 
         return count[0][0]
 
-    def get_runs_against(self, year, home):
-        if home == "Any":
-            if year == "All":
-                self.cursor.execute(f'SELECT SUM(opponentscore) FROM game;')
-            else:
-                self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE year={year};')
-            count = self.cursor.fetchall()
-
-            return count[0][0]
-
-        if home:
-            return self._get_runs_against_home(year)
-        else:
-            return self._get_runs_against_away(year)
-
-    def _get_runs_against_home(self, year):
+    def get_wins_in_year(self, year: int | str, home: bool | str):
         if year == "All":
-            self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE washome=1;')
+            if home == "Any":
+                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE score > opponentscore;')
+            elif home:
+                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE score > opponentscore AND washome=1;')
+            else:
+                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE score > opponentscore AND washome=0;')
         else:
-            self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE year={year} and washome=1;')
+            if home == "Any":
+                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE score > opponentscore AND year={year};')
+            elif home:
+                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE score > opponentscore AND year={year} AND washome=1;')
+            else:
+                self.cursor.execute(f'SELECT COUNT(id) FROM game WHERE score > opponentscore AND year={year} AND washome=0;')
+        
         count = self.cursor.fetchall()
-
         return count[0][0]
 
-    def _get_runs_against_away(self, year):
-        if year == "All":
-            self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE washome=0;')
+    def get_runs_in_year(self, own: bool, year: int | str, home: bool | str):
+        if own:
+            table_field = "score"
         else:
-            self.cursor.execute(f'SELECT SUM(opponentscore) FROM game WHERE year={year} and washome=0;')
-        count = self.cursor.fetchall()
+            table_field = "opponentscore"
 
+        if year == "All":
+            return self._get_runs_all_time(table_field, home)
+        else:
+            return self._get_runs_in_year(table_field, home, year)
+
+    def _get_runs_all_time(self, table_field: str, home: bool | str):
+        if home == "Any":
+            self.cursor.execute(f'SELECT SUM({table_field}) FROM game;')
+        elif home:
+            self.cursor.execute(f'SELECT SUM({table_field}) FROM game where washome=1;')
+        else:
+            self.cursor.execute(f'SELECT SUM({table_field}) FROM game where washome=0;')
+
+        count = self.cursor.fetchall()
+        return count[0][0]
+
+    def _get_runs_in_year(self, table_field: str, home: bool | str, year: int):
+        if home == "Any":
+            self.cursor.execute(f'SELECT SUM({table_field}) FROM game where year={year};')
+        elif home:
+            self.cursor.execute(f'SELECT SUM({table_field}) FROM game WHERE year={year} and washome=1;')
+        else:
+            self.cursor.execute(f'SELECT SUM({table_field}) FROM game WHERE year={year} and washome=0;')
+
+        count = self.cursor.fetchall()
         return count[0][0]
 
     def get_player_id(self, playername):
@@ -297,13 +316,15 @@ class DbConnection():
                                                gamenum,
                                                opponent,
                                                opponentscore,
-                                               washome)
+                                               washome,
+                                               score)
                              VALUES ({game.year},
                                      "{game.team}",
                                      {game.gamenum},
                                      "{game.opponent}",
                                      {game.opponentscore},
-                                     {game.was_home});'''
+                                     {game.was_home},
+                                     {game.score});'''
         self._execute_command(insert_command)
         self._insert_player_stats(game)
 
