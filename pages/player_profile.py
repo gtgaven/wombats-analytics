@@ -6,6 +6,7 @@ from frontend_common import get_nav_bar, db
 dash.register_page(__name__, path='/player')
 
 all_players = db.get_player_list()
+current_player = None
 
 def layout(**kwargs):
     player = kwargs.get("name", None)
@@ -105,3 +106,16 @@ def update_player_profile(player, season):
 def update_player_progression_graph(player):
     if not player:
         return
+
+    # TODO new function 'get_player_seasons' needs to return something like [2021, 2022, 2024]
+    # seasons = sorted(db.get_player_seasons(player)) 
+    # avgs = []
+    # for season in season:
+    #     stats = db.get_cumulative_stats(player, season)
+    #     avgs.append(stats.avg())
+
+    # TODO bargraph and extrapolation with the dater:
+    #seasons : [2021, 2022, 2023]
+    #avgs:     [0.455, 0.333, 0.400]
+    
+
