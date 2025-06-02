@@ -1,7 +1,10 @@
 import dash
 from dash import html, dcc, Input, Output, callback
+import pandas as pd
+import plotly.express as px
 import dash_bootstrap_components as dbc
 from frontend_common import get_nav_bar, db
+
 
 dash.register_page(__name__, path='/player')
 
@@ -108,14 +111,23 @@ def update_player_progression_graph(player):
         return
 
     # TODO new function 'get_player_seasons' needs to return something like [2021, 2022, 2024]
-    # seasons = sorted(db.get_player_seasons(player)) 
-    # avgs = []
-    # for season in season:
-    #     stats = db.get_cumulative_stats(player, season)
-    #     avgs.append(stats.avg())
-
-    # TODO bargraph and extrapolation with the dater:
-    #seasons : [2021, 2022, 2023]
-    #avgs:     [0.455, 0.333, 0.400]
     
+    seasons = sorted(db.get_player_seasons(player)) 
+    avgs = []
+
+    for season in seasons:
+        stats = db.get_cumulative_stats(player, season)
+        avgs.append(stats.avg())
+
+    average_by_season = {'seasons': seasons, 'avgs': avgs}
+    df = pd.DataFrame(data=average_by_season)
+    
+    linefig = px.line(df, x = "seasons", y = "avgs", title=f'{player} - Batting Average by Season', markers=True)
+    linefig.update_layout(yaxis_range=[0, 1])
+    linefig.update_xaxes(type='category')
+    return dcc.Graph(figure=linefig)
+
+
+
+
 

@@ -257,6 +257,13 @@ class DbConnection():
         seasons = [n[0] for n in results]
         return seasons
 
+    def get_player_seasons(self, player):   
+        id = self.get_player_id(player)
+        results = self._execute_query(f'SELECT year FROM roster WHERE player={id};')
+
+        return [n[0] for n in results]
+
+
     def get_cumulative_stats(self, player, season):
         players = []
         if season == 'All':
