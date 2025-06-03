@@ -26,7 +26,7 @@ def layout(**kwargs):
                 value=player,
                 style={"color": "#000000"})
             ],
-            style={"width": "250px", "color":"#fff", "padding-left": "20px"}
+            style={"width": "250px", "color":"#fff", "margin-left": "auto", "padding-right": "20px"}
         ),
         html.Div(id='player-profile-pane'),
         html.Div(id='player-progression-graph')
@@ -54,7 +54,7 @@ def update_player_profile(player, season):
             html.Td('%.3f'%(all_time_stats.slg()))
         ])
     ],
-    style={"font-size": "x-large"}
+    style={"font-size": "large"}
     )
 
     batting_table = html.Table([
@@ -88,9 +88,9 @@ def update_player_profile(player, season):
     ])
 
     if season == "All":
-        header = f"{player} - Career"
+        header = f"{player} – Career"
     else:
-        header = f"{player} - {season} Season"
+        header = f"{player} – {season} Season"
 
     main_profile_pane = html.Div([
         html.Table([
@@ -110,7 +110,15 @@ def update_player_profile(player, season):
 def update_player_progression_graph(player):
     if not player:
         return 
-       
+    layout = []
+    header = f"{player} – Career"
+    career_graphs_pane = html.Div([
+        html.Table([
+            html.Tr(html.Th(header))
+        ])
+    ])
+
+    # Game progression, overall season
     seasons = sorted(db.get_player_seasons(player)) 
     avgs = []
 
@@ -118,66 +126,66 @@ def update_player_progression_graph(player):
         stats = db.get_cumulative_stats(player, season)
         avgs.append(stats.avg())
 
-    average_by_season = {'seasons': seasons, 'avgs': avgs}
+    average_by_season = {'Season': seasons, 'Batting Average': avgs}
     df = pd.DataFrame(data=average_by_season)
     
-    linefig_batting_avg = px.line(df, x = "seasons", y = "avgs", title=f'{player} - Batting Average by Season', markers=True)
+    linefig_batting_avg = px.line(df, x = "Season", y = "Batting Average", title=f'Batting Average by Season', markers=True)
     linefig_batting_avg.update_layout(yaxis_range=[0, 1])
     linefig_batting_avg.update_xaxes(type='category')
     
-    # Game progression across all seasons
+    # Game progression, all games
 
-    player_game_stats = []
+    all_dfs = []
+    columns = ['name', 'plate_appearances', 'runs', 'sac_flies', 'walks','strikeouts', 'singles', 'doubles', 
+        'triples', 'home_runs'
+    ]
 
     for season in seasons:
-        stats = db.get_stats_for_player_in_seasons(player, [season])
-        
-        # Convert PlayerStats object to a dict
-        stats_dict = {
-            'player': player,
-            'season': season,
-            'games_played': stats.games_played,
-            'plate_appearances': stats.plate_appearances,
-            'runs': stats.runs,
-            'sac_flies': stats.sac_flies,
-            'walks': stats.walks,
-            'strikeouts': stats.strikeouts,
-            'singles': stats.singles,
-            'doubles': stats.doubles,
-            'triples': stats.triples,
-            'home_runs': stats.home_runs,
-            'avg': stats.avg(),
-            'obp': stats.obp(),
-            'slg': stats.slg()
-        }
+        for game_id in sorted(db.get_game_ids_in_season(season)):
+            raw_stats = db.get_raw_stats_from_game_id(game_id)
+            game_num = raw_stats['game_num']
 
-        player_game_stats.append(stats_dict)
+            df = pd.DataFrame(raw_stats['stats'], columns=columns)
+            df = df[df['name'] == player].copy()  # Make sure I'm getting the one player
+            df['game_num'] = game_num # Track actual game
+            df['Season'] = season  # Track which season each game is in
+            
+            all_dfs.append(df)   # TODO Need exception for Chad? Brandon?
+    
+    df_games = pd.concat(all_dfs, ignore_index=True) # Combine all games across all seasons (for each player)
+    df_games = df_games.sort_values(['Season', 'game_num']) # Sort to prep for rolling calcs
 
-    # Convert list of dicts into one DataFrame
-    player_game_df = pd.DataFrame(player_game_stats)
-    print(player_game_df)
+    # Batting average = hits / at bats
+    df_games['hits'] = df_games['singles'] + df_games['doubles'] + df_games['triples'] + df_games['home_runs']
+    df_games['at_bats'] = df_games['plate_appearances'] - df_games['walks'] - df_games['sac_flies']
+    df_games['batting_avg'] = df_games['hits'] / df_games['at_bats'].replace(0, pd.NA)
 
-        # summed_stats:list[PlayerStats] = db.get_career_stats_for_player(player) 
-        # player_game_dict={}
-        # player_game_dict['season'] = [season for _ in range(1,len(summed_stats) + 1)]
-        # player_game_dict['sacflies'] = [p.sac_flies for p in summed_stats] # TODO sort games
-        # player_game_dict['player_games_per_season'] = [i for i in range(1,len(summed_stats) + 1)] 
-        # df = pd.DataFrame(player_game_dict)
-        # player_game_dfs.append(df)
-        # print(df)
+    # Rolling average and rolling game count
+    df_games['Moving Average'] = df_games.groupby('Season')['batting_avg'].transform(lambda x: x.expanding().mean())
+    df_games['Player Games'] = df_games.groupby(['Season']).cumcount() + 1
 
-    # TODO Need exception for Chad?
+    print(df_games)
 
-    linefig_sacflies = px.line(
-        player_game_df,
-        x="player_games_per_season", y="sacflies", color="season",
-        title=f'{player} - Rolling SFs by Game (All Seasons)',
+    # Make progression figure - all seasons
+    linefig_moving_avg = px.line(
+        df_games,
+        x="Player Games", y="Moving Average", color="Season",
+        title=f'Moving Batting Average by Game',
         markers=True
-    ) # TODO change to batting average. I was just testing the function with sacs
-    linefig_sacflies.update_xaxes(type='category')
+    ) 
+    linefig_moving_avg.update_xaxes(type='category')
+    linefig_moving_avg.update_layout(
+        yaxis_range=[0, 1],
+        legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='rgba(0,0,0,0)', bordercolor='rgba(0,0,0,0)'),
+        margin=dict(t=120)
+    )
 
-    return html.Div ([dcc.Graph(figure=linefig_batting_avg), 
-        dcc.Graph(figure=linefig_sacflies)])
+    layout.append(career_graphs_pane)
+    layout.append(html.Div([
+    dcc.Graph(figure=linefig_batting_avg), 
+    dcc.Graph(figure=linefig_moving_avg)
+    ]))
+    return html.Div(layout)
 
 
 

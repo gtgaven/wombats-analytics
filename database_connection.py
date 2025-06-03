@@ -100,11 +100,6 @@ class DbConnection():
         stats = PlayerStats()
         for p in query_results:
             stats = stats + PlayerStats(1, p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11])
-        
-        # else:
-        #     stats = []
-        #     for p in query_results:
-        #         stats.append(PlayerStats(1, p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11])) # TODO remove accumulation option and make new function. There isn't a standard 16 games.
 
         return stats
 
