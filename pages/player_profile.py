@@ -127,28 +127,50 @@ def update_player_progression_graph(player):
     
     # Game progression across all seasons
 
-    player_game_dfs = []
-
-    columns = [
-        'name', 'plateappearances', 'runs', 'sacflies', 'walks',
-        'strikeouts', 'singles', 'doubles', 'triples', 'homeruns'
-    ]
+    player_game_stats = []
 
     for season in seasons:
-        raw_stats:list[PlayerStats] = db.get_stats_for_player_in_seasons(player, [season], False) 
-        input_data={}
-        input_data['season'] = [season for _ in range(1,len(raw_stats) + 1)]
-        input_data['sacflies'] = [p.sac_flies for p in raw_stats] # TODO sort games
-        input_data['game_num'] = [i for i in range(1,len(raw_stats) + 1)]
-        df = pd.DataFrame(input_data)
-        player_game_dfs.append(df)
-        print(df)
+        stats = db.get_stats_for_player_in_seasons(player, [season])
+        
+        # Convert PlayerStats object to a dict
+        stats_dict = {
+            'player': player,
+            'season': season,
+            'games_played': stats.games_played,
+            'plate_appearances': stats.plate_appearances,
+            'runs': stats.runs,
+            'sac_flies': stats.sac_flies,
+            'walks': stats.walks,
+            'strikeouts': stats.strikeouts,
+            'singles': stats.singles,
+            'doubles': stats.doubles,
+            'triples': stats.triples,
+            'home_runs': stats.home_runs,
+            'avg': stats.avg(),
+            'obp': stats.obp(),
+            'slg': stats.slg()
+        }
+
+        player_game_stats.append(stats_dict)
+
+    # Convert list of dicts into one DataFrame
+    player_game_df = pd.DataFrame(player_game_stats)
+    print(player_game_df)
+
+        # summed_stats:list[PlayerStats] = db.get_career_stats_for_player(player) 
+        # player_game_dict={}
+        # player_game_dict['season'] = [season for _ in range(1,len(summed_stats) + 1)]
+        # player_game_dict['sacflies'] = [p.sac_flies for p in summed_stats] # TODO sort games
+        # player_game_dict['player_games_per_season'] = [i for i in range(1,len(summed_stats) + 1)] 
+        # df = pd.DataFrame(player_game_dict)
+        # player_game_dfs.append(df)
+        # print(df)
 
     # TODO Need exception for Chad?
 
     linefig_sacflies = px.line(
-        player_game_dfs,
-        x="game_num", y="sacflies", color="season",
+        player_game_df,
+        x="player_games_per_season", y="sacflies", color="season",
         title=f'{player} - Rolling SFs by Game (All Seasons)',
         markers=True
     ) # TODO change to batting average. I was just testing the function with sacs
