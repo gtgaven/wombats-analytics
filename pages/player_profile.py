@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
 from frontend_common import get_nav_bar, db
+from player import PlayerStats
 
 
 dash.register_page(__name__, path='/player')
@@ -108,10 +109,8 @@ def update_player_profile(player, season):
 )
 def update_player_progression_graph(player):
     if not player:
-        return
-
-    # TODO new function 'get_player_seasons' needs to return something like [2021, 2022, 2024]
-    
+        return 
+       
     seasons = sorted(db.get_player_seasons(player)) 
     avgs = []
 
@@ -122,10 +121,41 @@ def update_player_progression_graph(player):
     average_by_season = {'seasons': seasons, 'avgs': avgs}
     df = pd.DataFrame(data=average_by_season)
     
-    linefig = px.line(df, x = "seasons", y = "avgs", title=f'{player} - Batting Average by Season', markers=True)
-    linefig.update_layout(yaxis_range=[0, 1])
-    linefig.update_xaxes(type='category')
-    return dcc.Graph(figure=linefig)
+    linefig_batting_avg = px.line(df, x = "seasons", y = "avgs", title=f'{player} - Batting Average by Season', markers=True)
+    linefig_batting_avg.update_layout(yaxis_range=[0, 1])
+    linefig_batting_avg.update_xaxes(type='category')
+    
+    # Game progression across all seasons
+
+    player_game_dfs = []
+
+    columns = [
+        'name', 'plateappearances', 'runs', 'sacflies', 'walks',
+        'strikeouts', 'singles', 'doubles', 'triples', 'homeruns'
+    ]
+
+    for season in seasons:
+        raw_stats:list[PlayerStats] = db.get_stats_for_player_in_seasons(player, [season], False) 
+        input_data={}
+        input_data['season'] = [season for _ in range(1,len(raw_stats) + 1)]
+        input_data['sacflies'] = [p.sac_flies for p in raw_stats] # TODO sort games
+        input_data['game_num'] = [i for i in range(1,len(raw_stats) + 1)]
+        df = pd.DataFrame(input_data)
+        player_game_dfs.append(df)
+        print(df)
+
+    # TODO Need exception for Chad?
+
+    linefig_sacflies = px.line(
+        player_game_dfs,
+        x="game_num", y="sacflies", color="season",
+        title=f'{player} - Rolling SFs by Game (All Seasons)',
+        markers=True
+    ) # TODO change to batting average. I was just testing the function with sacs
+    linefig_sacflies.update_xaxes(type='category')
+
+    return html.Div ([dcc.Graph(figure=linefig_batting_avg), 
+        dcc.Graph(figure=linefig_sacflies)])
 
 
 

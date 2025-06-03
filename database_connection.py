@@ -81,7 +81,7 @@ class DbConnection():
             player_id = self.get_player_id(player)
             self._insert_player_stat(player_id, game_id, stat)
 
-    def get_stats_for_player_in_seasons(self, playername, seasons):
+    def get_stats_for_player_in_seasons(self, playername, seasons, accumulate=True) -> PlayerStats | list[PlayerStats]:
         and_str = ''
         for i, s in enumerate(seasons):
             if i == len(seasons)-1:
@@ -97,11 +97,19 @@ class DbConnection():
         query += and_str
         query_results = self._execute_query(query)
 
-        stats = PlayerStats()
-        for p in query_results:
-            stats = stats + PlayerStats(1, p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11])
+        if accumulate:
+            
+            stats = PlayerStats()
+            for p in query_results:
+                stats = stats + PlayerStats(1, p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11])
+        
+        else:
+            stats = []
+            for p in query_results:
+                stats.append(PlayerStats(1, p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11])) # TODO remove accumulation option and make new function. There isn't a standard 16 games.
 
         return stats
+
 
     def get_career_stats_for_player(self, playername):
         return self.get_stats_for_player_in_seasons(playername, self.get_seasons())
