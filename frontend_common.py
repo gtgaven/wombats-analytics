@@ -18,7 +18,7 @@ nav_bar_element_style = {
 def get_nav_bar(default_season="All"):
     return dbc.NavbarSimple(
         children=[
-            dcc.Link('Player Profiles', href="/player", style=nav_bar_element_style),
+            dcc.Link('Players', href="/player", style=nav_bar_element_style),
             dcc.Link('Hall of Fame', href="/hall-of-fame", style=nav_bar_element_style),
             dcc.Link('Raw Data', href="/raw-data", style=nav_bar_element_style),
             html.Div([

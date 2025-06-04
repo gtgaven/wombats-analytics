@@ -150,7 +150,7 @@ def update_player_progression_graph(player):
             df['game_num'] = game_num # Track actual game
             df['Season'] = season  # Track which season each game is in
             
-            all_dfs.append(df)   # TODO Need exception for Chad? Brandon?
+            all_dfs.append(df)   # TODO Need exceptions for Chad? Brandon?
     
     df_games = pd.concat(all_dfs, ignore_index=True) # Combine all games across all seasons (for each player)
     df_games = df_games.sort_values(['Season', 'game_num']) # Sort to prep for rolling calcs
@@ -159,9 +159,11 @@ def update_player_progression_graph(player):
     df_games['hits'] = df_games['singles'] + df_games['doubles'] + df_games['triples'] + df_games['home_runs']
     df_games['at_bats'] = df_games['plate_appearances'] - df_games['walks'] - df_games['sac_flies']
     df_games['batting_avg'] = df_games['hits'] / df_games['at_bats'].replace(0, pd.NA)
+    df_games['hits_expanded'] = df_games.groupby('Season')['hits'].transform(lambda x: x.expanding().sum())
+    df_games['at_bats_expanded'] = df_games.groupby('Season')['at_bats'].transform(lambda x: x.expanding().sum())
 
     # Rolling average and rolling game count
-    df_games['Moving Average'] = df_games.groupby('Season')['batting_avg'].transform(lambda x: x.expanding().mean())
+    df_games['Moving Average'] = df_games['hits_expanded'] /df_games['at_bats_expanded']
     df_games['Player Games'] = df_games.groupby(['Season']).cumcount() + 1
 
     print(df_games)
