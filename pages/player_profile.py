@@ -1,7 +1,11 @@
 import dash
 from dash import html, dcc, Input, Output, callback
+import pandas as pd
+import plotly.express as px
 import dash_bootstrap_components as dbc
 from frontend_common import get_nav_bar, db
+from player import PlayerStats
+
 
 dash.register_page(__name__, path='/player')
 
@@ -22,7 +26,7 @@ def layout(**kwargs):
                 value=player,
                 style={"color": "#000000"})
             ],
-            style={"width": "250px", "color":"#fff", "padding-left": "20px"}
+            style={"width": "250px", "color":"#fff", "margin-left": "auto", "padding-right": "20px"}
         ),
         html.Div(id='player-profile-pane'),
         html.Div(id='player-progression-graph')
@@ -50,7 +54,7 @@ def update_player_profile(player, season):
             html.Td('%.3f'%(all_time_stats.slg()))
         ])
     ],
-    style={"font-size": "x-large"}
+    style={"font-size": "large"}
     )
 
     batting_table = html.Table([
@@ -84,9 +88,9 @@ def update_player_profile(player, season):
     ])
 
     if season == "All":
-        header = f"{player} - Career"
+        header = f"{player} – Career"
     else:
-        header = f"{player} - {season} Season"
+        header = f"{player} – {season} Season"
 
     main_profile_pane = html.Div([
         html.Table([
@@ -105,17 +109,87 @@ def update_player_profile(player, season):
 )
 def update_player_progression_graph(player):
     if not player:
-        return
+        return 
+    layout = []
+    header = f"{player} – Career"
+    career_graphs_pane = html.Div([
+        html.Table([
+            html.Tr(html.Th(header))
+        ])
+    ])
 
-    # TODO new function 'get_player_seasons' needs to return something like [2021, 2022, 2024]
-    # seasons = sorted(db.get_player_seasons(player)) 
-    # avgs = []
-    # for season in season:
-    #     stats = db.get_cumulative_stats(player, season)
-    #     avgs.append(stats.avg())
+    # Game progression, overall season
+    seasons = sorted(db.get_player_seasons(player)) 
+    avgs = []
 
-    # TODO bargraph and extrapolation with the dater:
-    #seasons : [2021, 2022, 2023]
-    #avgs:     [0.455, 0.333, 0.400]
+    for season in seasons:
+        stats = db.get_cumulative_stats(player, season)
+        avgs.append(stats.avg())
+
+    average_by_season = {'Season': seasons, 'Batting Average': avgs}
+    df = pd.DataFrame(data=average_by_season)
     
+    linefig_batting_avg = px.line(df, x = "Season", y = "Batting Average", title=f'Batting Average by Season', markers=True)
+    linefig_batting_avg.update_layout(yaxis_range=[0, 1])
+    linefig_batting_avg.update_xaxes(type='category')
+    
+    # Game progression, all games
+
+    all_dfs = []
+    columns = ['name', 'plate_appearances', 'runs', 'sac_flies', 'walks','strikeouts', 'singles', 'doubles', 
+        'triples', 'home_runs'
+    ]
+
+    for season in seasons:
+        for game_id in sorted(db.get_game_ids_in_season(season)):
+            raw_stats = db.get_raw_stats_from_game_id(game_id)
+            game_num = raw_stats['game_num']
+
+            df = pd.DataFrame(raw_stats['stats'], columns=columns)
+            df = df[df['name'] == player].copy()  # Make sure I'm getting the one player
+            df['game_num'] = game_num # Track actual game
+            df['Season'] = season  # Track which season each game is in
+            
+            all_dfs.append(df)   # TODO Need exceptions for Chad? Brandon?
+    
+    df_games = pd.concat(all_dfs, ignore_index=True) # Combine all games across all seasons (for each player)
+    df_games = df_games.sort_values(['Season', 'game_num']) # Sort to prep for rolling calcs
+
+    # Batting average = hits / at bats
+    df_games['hits'] = df_games['singles'] + df_games['doubles'] + df_games['triples'] + df_games['home_runs']
+    df_games['at_bats'] = df_games['plate_appearances'] - df_games['walks'] - df_games['sac_flies']
+    df_games['batting_avg'] = df_games['hits'] / df_games['at_bats'].replace(0, pd.NA)
+    df_games['hits_expanded'] = df_games.groupby('Season')['hits'].transform(lambda x: x.expanding().sum())
+    df_games['at_bats_expanded'] = df_games.groupby('Season')['at_bats'].transform(lambda x: x.expanding().sum())
+
+    # Rolling average and rolling game count
+    df_games['Moving Average'] = df_games['hits_expanded'] /df_games['at_bats_expanded']
+    df_games['Player Games'] = df_games.groupby(['Season']).cumcount() + 1
+
+    print(df_games)
+
+    # Make progression figure - all seasons
+    linefig_moving_avg = px.line(
+        df_games,
+        x="Player Games", y="Moving Average", color="Season",
+        title=f'Moving Batting Average by Game',
+        markers=True
+    ) 
+    linefig_moving_avg.update_xaxes(type='category')
+    linefig_moving_avg.update_layout(
+        yaxis_range=[0, 1],
+        legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='rgba(0,0,0,0)', bordercolor='rgba(0,0,0,0)'),
+        margin=dict(t=120)
+    )
+
+    layout.append(career_graphs_pane)
+    layout.append(html.Div([
+    dcc.Graph(figure=linefig_batting_avg), 
+    dcc.Graph(figure=linefig_moving_avg)
+    ]))
+    return html.Div(layout)
+
+
+
+
 

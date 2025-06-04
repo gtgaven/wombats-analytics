@@ -81,7 +81,7 @@ class DbConnection():
             player_id = self.get_player_id(player)
             self._insert_player_stat(player_id, game_id, stat)
 
-    def get_stats_for_player_in_seasons(self, playername, seasons):
+    def get_stats_for_player_in_seasons(self, playername, seasons) -> PlayerStats:
         and_str = ''
         for i, s in enumerate(seasons):
             if i == len(seasons)-1:
@@ -96,12 +96,13 @@ class DbConnection():
                     WHERE playerstat.player={id} AND ('''
         query += and_str
         query_results = self._execute_query(query)
-
+            
         stats = PlayerStats()
         for p in query_results:
             stats = stats + PlayerStats(1, p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11])
 
         return stats
+
 
     def get_career_stats_for_player(self, playername):
         return self.get_stats_for_player_in_seasons(playername, self.get_seasons())
@@ -256,6 +257,13 @@ class DbConnection():
 
         seasons = [n[0] for n in results]
         return seasons
+
+    def get_player_seasons(self, player):   
+        id = self.get_player_id(player)
+        results = self._execute_query(f'SELECT year FROM roster WHERE player={id};')
+
+        return [n[0] for n in results]
+
 
     def get_cumulative_stats(self, player, season):
         players = []
