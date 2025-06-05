@@ -5,7 +5,6 @@ import plotly.express as px
 import dash_bootstrap_components as dbc
 from frontend_common import get_nav_bar, db
 from player import PlayerStats
-from time import perf_counter
 
 
 dash.register_page(__name__, path='/player')
@@ -135,10 +134,9 @@ def update_player_progression_graph(player):
     linefig_batting_avg.update_xaxes(type='category')
     
     # Game progression, all games
-    t0 = perf_counter()
     columns, stats = db.get_all_player_stats_for_player(player)
     df_games = pd.DataFrame(stats, columns=columns)
-    #df_games = df_games.sort_values(['Season', 'game_num']) TODO put in sql query
+    #df_games = df_games.sort_values(['Season', 'game_num']) TODO put in sql query ?
 
     # Batting average = hits / at bats
     df_games['hits'] = df_games['singles'] + df_games['doubles'] + df_games['triples'] + df_games['home_runs']
@@ -171,8 +169,6 @@ def update_player_progression_graph(player):
     dcc.Graph(figure=linefig_moving_avg)
     ]))
 
-    delta = perf_counter() - t0
-    print(f"time elapsed: {delta=}")
     return html.Div(layout)
 
 
