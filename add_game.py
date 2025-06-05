@@ -10,7 +10,7 @@ def add_game(args):
     game = Game(args.game_json, args.stats_csv)
     print(f'{game} - input validated successfully')
 
-    db = DbConnection('root', 'winnie2', args.commit_changes)
+    db = DbConnection(args.commit_changes)
     db.verify_players_exist_in_database(game.player_stats.keys())
     db.insert_game(game)
 

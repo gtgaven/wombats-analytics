@@ -78,7 +78,26 @@ ROSTERS = {
             "Steve",
             "Ted",
             "Zach"
-        ]
+        ],
+    "2025":[
+        "Lamo B",
+        "Deep B",
+        "Keith B",
+        "Justin G",
+        "Shane H",
+        "Ken H",
+        "Frances K",
+        "Adam P",
+        "Ted S",
+        "Ron S",
+        "Fahad S",
+        "Taylor S",
+        "Ian W",
+        "Grey D",
+        "Eloisa D",
+        "Nick K",
+        "Greg G"
+    ]
 }
 
 class Game:

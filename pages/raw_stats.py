@@ -1,49 +1,30 @@
 import dash
 from dash import html, dcc, Input, Output, callback
-from database_connection import DbConnection
 import dash_bootstrap_components as dbc
+from frontend_common import get_nav_bar, db
 
-db = DbConnection('softball_readonly', 'softballrules!')
-
-dash.register_page(__name__, path='/raw')
+dash.register_page(__name__, path='/raw-data')
 
 seasons = db.get_seasons()
 most_recent_season = seasons[len(seasons)-1]
 
-
-raw_stats_bar = dbc.NavbarSimple(
-    children=[
-        html.Div([
-            'Season:',
-            dcc.Dropdown(
-                options=seasons,
-                id='raw-stats-season-select',
-                value=most_recent_season,
-                style={"color": "#000000"}
-            )],
-            style={"width": "200px", "color":"#fff", "padding-right": "20px"}
-        )
-    ],
-    brand="West Building Wombats",
-    brand_href="/",
-    color="#696969",
-    dark=True
-)
-
-
 layout = html.Div([
-    raw_stats_bar,
+    get_nav_bar(most_recent_season),
     html.Div(id='raw-stats')
 ])
 
 
 @callback(
     Output(component_id='raw-stats', component_property='children'),
-    Input(component_id='raw-stats-season-select', component_property='value')
+    Input(component_id='season-select', component_property='value')
 )
 def update_raw_stats(season):
     if not season:
         return
+
+    if season == "All":
+        # this case isn't really important, just use the most recent season
+        season = most_recent_season
 
     layout = []
 
