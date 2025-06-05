@@ -103,6 +103,15 @@ class DbConnection():
 
         return stats
 
+    def get_all_player_stats_for_player(self, playername):
+        id = self.get_player_id(playername)
+        query = f'''SELECT game.id, year, plateappearances, runs, sacflies, walks, strikeouts, singles, doubles, triples, homeruns 
+                    FROM playerstat
+                    INNER JOIN game ON playerstat.game=game.id
+                    WHERE playerstat.player={id}'''
+        results = self._execute_query(query)
+        return ("game_num", "Season", "plate_appearances", "runs", 'sac_flies', 'walks','strikeouts', 'singles', 'doubles', "triples", "home_runs"), results
+
 
     def get_career_stats_for_player(self, playername):
         return self.get_stats_for_player_in_seasons(playername, self.get_seasons())
