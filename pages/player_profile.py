@@ -17,7 +17,7 @@ def layout(**kwargs):
     return html.Div([
         get_nav_bar(),
         html.Div([
-            'Player:',
+            'Player',
             dcc.Dropdown(
                 placeholder="Select a player",
                 options=all_players,
@@ -26,7 +26,7 @@ def layout(**kwargs):
                 value=player,
                 style={"color": "#000000"})
             ],
-            style={"width": "250px", "color":"#fff", "margin-left": "auto", "padding-right": "20px"}
+            style={"width": "250px", "margin-left": "auto"}
         ),
         html.Div(id='player-profile-pane'),
         html.Div(id='player-progression-graph')
@@ -54,7 +54,7 @@ def update_player_profile(player, season):
             html.Td('%.3f'%(all_time_stats.slg()))
         ])
     ],
-    style={"font-size": "large"}
+    style={"font-size": "medium"}
     )
 
     batting_table = html.Table([
@@ -67,7 +67,9 @@ def update_player_profile(player, season):
             html.Td(all_time_stats.triples),
             html.Td(all_time_stats.home_runs)
         ])
-    ])
+    ],
+    style={"font-size": "medium"}
+    )
 
     misc_table = html.Table([
         html.Tr([html.Th(col) for col in ['GP', 'AB', 'PA', 'BB', 'SF', 'K']]),
@@ -79,13 +81,16 @@ def update_player_profile(player, season):
             html.Td(all_time_stats.sac_flies),
             html.Td(all_time_stats.strikeouts)
         ])
-    ])
+    ],
+    style={"font-size": "medium"}
+    )
 
     main_player_stats_table = html.Table([
         html.Tr(avg_table),
         html.Tr(batting_table),
         html.Tr(misc_table)
-    ])
+    ]    ,
+    style={"font-size": "medium"})
 
     if season == "All":
         header = f"{player} – Career"
@@ -98,7 +103,8 @@ def update_player_profile(player, season):
             html.Tr(html.Td(html.Img(src="../assets/pic.png", alt='image'))),
             html.Tr(html.Td(main_player_stats_table))
         ])
-    ])
+    ],
+    style={"font-size": "x-large"})
     layout.append(main_profile_pane)
     return layout
 
@@ -116,7 +122,9 @@ def update_player_progression_graph(player):
         html.Table([
             html.Tr(html.Th(header))
         ])
-    ])
+    ],
+    style={"font-size": "x-large"}
+    )
 
     # Game progression, overall season
     seasons = sorted(db.get_player_seasons(player)) 
@@ -126,11 +134,11 @@ def update_player_progression_graph(player):
         stats = db.get_cumulative_stats(player, season)
         avgs.append(stats.avg())
 
-    average_by_season = {'Season': seasons, 'Batting Average': avgs}
+    average_by_season = {'Season': seasons, 'AVG': avgs}
     df = pd.DataFrame(data=average_by_season)
     
-    linefig_batting_avg = px.line(df, x = "Season", y = "Batting Average", title=f'Batting Average by Season', markers=True)
-    linefig_batting_avg.update_layout(yaxis_range=[0, 1])
+    linefig_batting_avg = px.line(df, x = "Season", y = "AVG", title=f'Batting Average by Season', markers=True)
+    linefig_batting_avg.update_layout(yaxis_range=[0, 1], template="plotly_dark", paper_bgcolor="#000000", plot_bgcolor="#000000")
     linefig_batting_avg.update_xaxes(type='category')
     
     # Game progression, all games
@@ -160,7 +168,10 @@ def update_player_progression_graph(player):
     linefig_moving_avg.update_layout(
         yaxis_range=[0, 1],
         legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='rgba(0,0,0,0)', bordercolor='rgba(0,0,0,0)'),
-        margin=dict(t=120)
+        margin=dict(t=120),
+        template="plotly_dark", 
+        paper_bgcolor="#000000",
+        plot_bgcolor="#000000"
     )
 
     layout.append(career_graphs_pane)
@@ -170,8 +181,3 @@ def update_player_progression_graph(player):
     ]))
 
     return html.Div(layout)
-
-
-
-
-

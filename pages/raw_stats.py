@@ -43,7 +43,7 @@ def update_raw_stats(season):
 
         layout.append(
             html.Div([
-            html.H3(header),
+            html.H3(header, style={"color": "#D3D3D3"}),
             html.Table(
                 [html.Tr([html.Th(col) for col in ['Player', 'PA', 'R', 'SF', 'BB', 'K', '1B', '2B', '3B', 'HR']]) ] +
                 rows

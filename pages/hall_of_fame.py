@@ -53,9 +53,9 @@ def update_graph(season):
             continue
 
         if season == 'All':
-            chart_title = f'{s} - Top 10 (All Time)'
+            chart_title = f'{s} – Top 10 (All Time)'
         else:
-            chart_title = f'{s} - Top 10 ({season})'
+            chart_title = f'{s} – Top 10 ({season})'
         df = df.sort_values([s], ascending=False)
         if s == 'Batting Average' or s == 'On Base Percentage' or s == 'Slugging Percentage':
             text_format = ['%.3f'%(i) for i in df[s][:10]]
@@ -65,8 +65,11 @@ def update_graph(season):
                              data=go.Bar(x=df['Player'][:10],
                                          y=df[s][:10],
                                          text=text_format))
-        bargraph.update_layout(template="plotly_white", font={'size':16, 'family':"Calibri", 'color':"#000"})
-        bargraph.update_traces(marker_color='#696969')
+        bargraph.update_layout(template="plotly_dark", 
+            paper_bgcolor="#000000",
+            plot_bgcolor="#000000", 
+            font={'size':16, 'family':"sans-serif"}
+        )
         layout.append(dcc.Graph(figure=bargraph))
 
     return layout
