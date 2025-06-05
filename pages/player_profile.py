@@ -5,6 +5,7 @@ import plotly.express as px
 import dash_bootstrap_components as dbc
 from frontend_common import get_nav_bar, db
 from player import PlayerStats
+from time import perf_counter
 
 
 dash.register_page(__name__, path='/player')
@@ -134,26 +135,10 @@ def update_player_progression_graph(player):
     linefig_batting_avg.update_xaxes(type='category')
     
     # Game progression, all games
-
-    all_dfs = []
-    columns = ['name', 'plate_appearances', 'runs', 'sac_flies', 'walks','strikeouts', 'singles', 'doubles', 
-        'triples', 'home_runs'
-    ]
-
-    for season in seasons:
-        for game_id in sorted(db.get_game_ids_in_season(season)):
-            raw_stats = db.get_raw_stats_from_game_id(game_id)
-            game_num = raw_stats['game_num']
-
-            df = pd.DataFrame(raw_stats['stats'], columns=columns)
-            df = df[df['name'] == player].copy()  # Make sure I'm getting the one player
-            df['game_num'] = game_num # Track actual game
-            df['Season'] = season  # Track which season each game is in
-            
-            all_dfs.append(df)   # TODO Need exceptions for Chad? Brandon?
-    
-    df_games = pd.concat(all_dfs, ignore_index=True) # Combine all games across all seasons (for each player)
-    df_games = df_games.sort_values(['Season', 'game_num']) # Sort to prep for rolling calcs
+    t0 = perf_counter()
+    columns, stats = db.get_all_player_stats_for_player(player)
+    df_games = pd.DataFrame(stats, columns=columns)
+    #df_games = df_games.sort_values(['Season', 'game_num']) TODO put in sql query
 
     # Batting average = hits / at bats
     df_games['hits'] = df_games['singles'] + df_games['doubles'] + df_games['triples'] + df_games['home_runs']
@@ -163,16 +148,14 @@ def update_player_progression_graph(player):
     df_games['at_bats_expanded'] = df_games.groupby('Season')['at_bats'].transform(lambda x: x.expanding().sum())
 
     # Rolling average and rolling game count
-    df_games['Moving Average'] = df_games['hits_expanded'] /df_games['at_bats_expanded']
-    df_games['Player Games'] = df_games.groupby(['Season']).cumcount() + 1
-
-    print(df_games)
+    df_games['AVG'] = df_games['hits_expanded'] /df_games['at_bats_expanded']
+    df_games['Games Played'] = df_games.groupby(['Season']).cumcount() + 1
 
     # Make progression figure - all seasons
     linefig_moving_avg = px.line(
         df_games,
-        x="Player Games", y="Moving Average", color="Season",
-        title=f'Moving Batting Average by Game',
+        x="Games Played", y="AVG", color="Season",
+        title=f'Cumulative Batting Average by Game',
         markers=True
     ) 
     linefig_moving_avg.update_xaxes(type='category')
@@ -187,6 +170,9 @@ def update_player_progression_graph(player):
     dcc.Graph(figure=linefig_batting_avg), 
     dcc.Graph(figure=linefig_moving_avg)
     ]))
+
+    delta = perf_counter() - t0
+    print(f"time elapsed: {delta=}")
     return html.Div(layout)
 
 
