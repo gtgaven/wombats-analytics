@@ -111,7 +111,7 @@ class DbConnection():
                     WHERE playerstat.player={id}
                     ORDER BY game.year, game.gamenum;'''
         results = self._execute_query(query)
-        return ("Season", "plate_appearances", "runs", 'sac_flies', 'walks','strikeouts', 'singles', 'doubles', "triples", "home_runs"), results
+        return results
 
     def get_all_rolling_cumulative_stats_for_player(self, playername) -> dict:
         """returns {"2021": [PlayerStats(...), PlayerStats(...)],
@@ -121,7 +121,7 @@ class DbConnection():
             guarenteed to be ordered by game
 
         """
-        _, stats = self._get_all_player_stats_for_player(playername)
+        stats = self._get_all_player_stats_for_player(playername)
         rolling_cumulatives = {}
         for s in stats:
             if s[0] not in rolling_cumulatives:

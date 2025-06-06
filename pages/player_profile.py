@@ -134,11 +134,10 @@ def update_player_progression_graph(player):
     df_games = pd.DataFrame(game_stats, columns=["Season", "Games Played", "AVG", "SLG"])
     df_seasons = pd.DataFrame(season_stats, columns=["Season", "AVG", "SLG"])
     
-    linefig_batting_avg = px.line(df_seasons, x ="Season", y ="AVG", title=f'Batting Average by Season', markers=True)
-    linefig_batting_avg.update_layout(yaxis_range=[0, 1])
+    linefig_batting_avg = px.line(df_seasons, x ="Season", y =["AVG", "SLG"], title=f'AVG & SLG by Season', markers=True)
     linefig_batting_avg.update_xaxes(type='category')
 
-    # Make progression figure - all seasons
+    # Make progression figures - all seasons
     linefig_moving_avg = px.line(
         df_games,
         x="Games Played", y="AVG", color="Season",
@@ -152,10 +151,23 @@ def update_player_progression_graph(player):
         margin=dict(t=120)
     )
 
+    linefig_moving_slg = px.line(
+        df_games,
+        x="Games Played", y="SLG", color="Season",
+        title=f'Cumulative Slugging Percentage by Game',
+        markers=True
+    ) 
+    linefig_moving_slg.update_xaxes(type='category')
+    linefig_moving_slg.update_layout(
+        legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='rgba(0,0,0,0)', bordercolor='rgba(0,0,0,0)'),
+        margin=dict(t=120)
+    )
+
     layout.append(career_graphs_pane)
     layout.append(html.Div([
     dcc.Graph(figure=linefig_batting_avg), 
-    dcc.Graph(figure=linefig_moving_avg)
+    dcc.Graph(figure=linefig_moving_avg),
+    dcc.Graph(figure=linefig_moving_slg)
     ]))
 
     return html.Div(layout)
