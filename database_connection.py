@@ -103,15 +103,39 @@ class DbConnection():
 
         return stats
 
-    def get_all_player_stats_for_player(self, playername):
+    def _get_all_player_stats_for_player(self, playername):
         id = self.get_player_id(playername)
-        query = f'''SELECT game.id, year, plateappearances, runs, sacflies, walks, strikeouts, singles, doubles, triples, homeruns 
+        query = f'''SELECT year, plateappearances, runs, sacflies, walks, strikeouts, singles, doubles, triples, homeruns 
                     FROM playerstat
                     INNER JOIN game ON playerstat.game=game.id
-                    WHERE playerstat.player={id}'''
+                    WHERE playerstat.player={id}
+                    ORDER BY game.year, game.gamenum;'''
         results = self._execute_query(query)
-        return ("game_num", "Season", "plate_appearances", "runs", 'sac_flies', 'walks','strikeouts', 'singles', 'doubles', "triples", "home_runs"), results
+        return results
 
+    def get_all_rolling_cumulative_stats_for_player(self, playername) -> dict:
+        """returns {"2021": [PlayerStats(...), PlayerStats(...)],
+                    "2022": [PlayerStats(...), PlayerStats(...)]}
+
+            where each subsequent PlayerStats is the addition of all the previous PlayerStats,
+            guarenteed to be ordered by game
+
+        """
+        stats = self._get_all_player_stats_for_player(playername)
+        rolling_cumulatives = {}
+        for s in stats:
+            if s[0] not in rolling_cumulatives:
+                rolling_cumulatives[s[0]] = []
+
+            current_length = len(rolling_cumulatives[s[0]])
+            if current_length == 0:
+                rolling_cumulatives[s[0]].append(PlayerStats(1, s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8], s[9]))
+            else:
+                previous_cumulative_stat = rolling_cumulatives[s[0]][current_length - 1]
+                rolling_cumulatives[s[0]].append(previous_cumulative_stat +
+                                                 PlayerStats(1, s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8], s[9]))
+
+        return rolling_cumulatives
 
     def get_career_stats_for_player(self, playername):
         return self.get_stats_for_player_in_seasons(playername, self.get_seasons())

@@ -125,38 +125,32 @@ def update_player_progression_graph(player):
     style={"font-size": "x-large"}
     )
 
-    # Game progression, overall season
-    seasons = sorted(db.get_player_seasons(player)) 
-    avgs = []
 
-    for season in seasons:
-        stats = db.get_cumulative_stats(player, season)
-        avgs.append(stats.avg())
-
-    average_by_season = {'Season': seasons, 'AVG': avgs}
-    df = pd.DataFrame(data=average_by_season)
+    rolling_cumulative = db.get_all_rolling_cumulative_stats_for_player(player)
     
-    linefig_batting_avg = px.line(df, x = "Season", y = "AVG", title=f'Batting Average by Season', markers=True)
-    linefig_batting_avg.update_layout(yaxis_range=[0, 1], template="plotly_dark", paper_bgcolor="#000000", plot_bgcolor="#000000")
+    game_stats = []
+    season_stats = []
+    for season, playerstats in rolling_cumulative.items():
+        game_stats.extend([[season, p.games_played, p.avg(), p.slg()] for p in playerstats])
+        # last PlayerStats of each season are the season-cumulative
+        season_stats.append([season,
+                             playerstats[len(playerstats) - 1].avg(),
+                             playerstats[len(playerstats) - 1].slg()])
+
+    
+    
+    df_games = pd.DataFrame(game_stats, columns=["Season", "Games Played", "AVG", "SLG"])
+    df_seasons = pd.DataFrame(season_stats, columns=["Season", "AVG", "SLG"])
+    
+    linefig_batting_avg = px.line(df_seasons, x ="Season", y =["AVG", "SLG"], title=f'AVG & SLG by Season', markers=True)
+    linefig_batting_avg.update_layout(
+        template="plotly_dark", 
+        paper_bgcolor="#000000", 
+        plot_bgcolor="#000000"
+    )
     linefig_batting_avg.update_xaxes(type='category')
-    
-    # Game progression, all games
-    columns, stats = db.get_all_player_stats_for_player(player)
-    df_games = pd.DataFrame(stats, columns=columns)
-    #df_games = df_games.sort_values(['Season', 'game_num']) TODO put in sql query ?
 
-    # Batting average = hits / at bats
-    df_games['hits'] = df_games['singles'] + df_games['doubles'] + df_games['triples'] + df_games['home_runs']
-    df_games['at_bats'] = df_games['plate_appearances'] - df_games['walks'] - df_games['sac_flies']
-    df_games['batting_avg'] = df_games['hits'] / df_games['at_bats'].replace(0, pd.NA)
-    df_games['hits_expanded'] = df_games.groupby('Season')['hits'].transform(lambda x: x.expanding().sum())
-    df_games['at_bats_expanded'] = df_games.groupby('Season')['at_bats'].transform(lambda x: x.expanding().sum())
-
-    # Rolling average and rolling game count
-    df_games['AVG'] = df_games['hits_expanded'] /df_games['at_bats_expanded']
-    df_games['Games Played'] = df_games.groupby(['Season']).cumcount() + 1
-
-    # Make progression figure - all seasons
+    # Make progression figures - all seasons
     linefig_moving_avg = px.line(
         df_games,
         x="Games Played", y="AVG", color="Season",
@@ -173,10 +167,26 @@ def update_player_progression_graph(player):
         plot_bgcolor="#000000"
     )
 
+    linefig_moving_slg = px.line(
+        df_games,
+        x="Games Played", y="SLG", color="Season",
+        title=f'Cumulative Slugging Percentage by Game',
+        markers=True
+    ) 
+    linefig_moving_slg.update_xaxes(type='category')
+    linefig_moving_slg.update_layout(
+        legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='rgba(0,0,0,0)', bordercolor='rgba(0,0,0,0)'),
+        margin=dict(t=120),
+        template="plotly_dark", 
+        paper_bgcolor="#000000",
+        plot_bgcolor="#000000"
+    )
+
     layout.append(career_graphs_pane)
     layout.append(html.Div([
     dcc.Graph(figure=linefig_batting_avg), 
-    dcc.Graph(figure=linefig_moving_avg)
+    dcc.Graph(figure=linefig_moving_avg),
+    dcc.Graph(figure=linefig_moving_slg)
     ]))
 
     return html.Div(layout)
