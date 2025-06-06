@@ -118,36 +118,25 @@ def update_player_progression_graph(player):
         ])
     ])
 
-    # Game progression, overall season
-    seasons = sorted(db.get_player_seasons(player)) 
-    avgs = []
-
-    for season in seasons:
-        stats = db.get_cumulative_stats(player, season)
-        avgs.append(stats.avg())
-
-    average_by_season = {'Season': seasons, 'Batting Average': avgs}
-    df = pd.DataFrame(data=average_by_season)
+    rolling_cumulative = db.get_all_rolling_cumulative_stats_for_player(player)
     
-    linefig_batting_avg = px.line(df, x = "Season", y = "Batting Average", title=f'Batting Average by Season', markers=True)
+    game_stats = []
+    season_stats = []
+    for season, playerstats in rolling_cumulative.items():
+        game_stats.extend([[season, p.games_played, p.avg(), p.slg()] for p in playerstats])
+        # last PlayerStats of each season are the season-cumulative
+        season_stats.append([season,
+                             playerstats[len(playerstats) - 1].avg(),
+                             playerstats[len(playerstats) - 1].slg()])
+
+    
+    
+    df_games = pd.DataFrame(game_stats, columns=["Season", "Games Played", "AVG", "SLG"])
+    df_seasons = pd.DataFrame(season_stats, columns=["Season", "AVG", "SLG"])
+    
+    linefig_batting_avg = px.line(df_seasons, x ="Season", y ="AVG", title=f'Batting Average by Season', markers=True)
     linefig_batting_avg.update_layout(yaxis_range=[0, 1])
     linefig_batting_avg.update_xaxes(type='category')
-    
-    # Game progression, all games
-    columns, stats = db.get_all_player_stats_for_player(player)
-    df_games = pd.DataFrame(stats, columns=columns)
-    #df_games = df_games.sort_values(['Season', 'game_num']) TODO put in sql query ?
-
-    # Batting average = hits / at bats
-    df_games['hits'] = df_games['singles'] + df_games['doubles'] + df_games['triples'] + df_games['home_runs']
-    df_games['at_bats'] = df_games['plate_appearances'] - df_games['walks'] - df_games['sac_flies']
-    df_games['batting_avg'] = df_games['hits'] / df_games['at_bats'].replace(0, pd.NA)
-    df_games['hits_expanded'] = df_games.groupby('Season')['hits'].transform(lambda x: x.expanding().sum())
-    df_games['at_bats_expanded'] = df_games.groupby('Season')['at_bats'].transform(lambda x: x.expanding().sum())
-
-    # Rolling average and rolling game count
-    df_games['AVG'] = df_games['hits_expanded'] /df_games['at_bats_expanded']
-    df_games['Games Played'] = df_games.groupby(['Season']).cumcount() + 1
 
     # Make progression figure - all seasons
     linefig_moving_avg = px.line(
