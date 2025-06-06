@@ -112,7 +112,7 @@ def update_stats_summary(season):
             html.Td(rf_any - ra_any),
         ]
         ),
-    ])
+    ], className="landingtable")
 
     layout = [
         html.H3(team_header, style={"color": "#D3D3D3"}),
@@ -121,18 +121,15 @@ def update_stats_summary(season):
         html.Table([
             html.Tr([html.Th(col) for col in ['', 'AVG', 'OBP', 'SLG']]),
             *[stats_avg_row(i) for i in stats.keys()]
-        ]
-        ),
+        ], className="landingtable"),
         html.Table([
-            html.Tr([html.Th(col) for col in ['', 'H', 'R', '1B', '2B', '3B', 'HR']]) ,
+            html.Tr([html.Th(col) for col in ['', 'H', 'R', '1B', '2B', '3B', 'HR']]),
             *[stats_batting_row(i) for i in stats.keys()]
-        ]
-        ),   
+        ], className="landingtable"),
         html.Table([
             html.Tr([html.Th(col) for col in ['', 'GP', 'AB', 'PA', 'BB', 'SF', 'K']]),
             *[stats_misc_row(i) for i in stats.keys()]
-        ]
-        )
+        ], className="landingtable")
     ]
 
     return layout

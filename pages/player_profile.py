@@ -29,7 +29,7 @@ def layout(**kwargs):
             style={"width": "250px", "margin-left": "auto"}
         ),
         html.Div(id='player-profile-pane'),
-        html.Div(id='player-progression-graph')
+        html.Div(id='player-progression-graph'), 
     ])
 
 
@@ -53,7 +53,7 @@ def update_player_profile(player, season):
             html.Td('%.3f'%(all_time_stats.obp())),
             html.Td('%.3f'%(all_time_stats.slg()))
         ])
-    ],
+    ], 
     style={"font-size": "medium"}
     )
 
@@ -67,7 +67,7 @@ def update_player_profile(player, season):
             html.Td(all_time_stats.triples),
             html.Td(all_time_stats.home_runs)
         ])
-    ],
+    ], 
     style={"font-size": "medium"}
     )
 
@@ -81,7 +81,7 @@ def update_player_profile(player, season):
             html.Td(all_time_stats.sac_flies),
             html.Td(all_time_stats.strikeouts)
         ])
-    ],
+    ], 
     style={"font-size": "medium"}
     )
 
@@ -89,7 +89,7 @@ def update_player_profile(player, season):
         html.Tr(avg_table),
         html.Tr(batting_table),
         html.Tr(misc_table)
-    ]    ,
+    ], 
     style={"font-size": "medium"})
 
     if season == "All":
@@ -107,7 +107,6 @@ def update_player_profile(player, season):
     style={"font-size": "x-large"})
     layout.append(main_profile_pane)
     return layout
-
 
 @callback(
     Output(component_id='player-progression-graph', component_property='children'),

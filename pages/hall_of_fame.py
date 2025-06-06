@@ -70,6 +70,7 @@ def update_graph(season):
             plot_bgcolor="#000000", 
             font={'size':16, 'family':"sans-serif"}
         )
+        bargraph.update_traces(marker_color='#3f4952')
         layout.append(dcc.Graph(figure=bargraph))
 
     return layout

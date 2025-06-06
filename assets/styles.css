@@ -20,8 +20,8 @@ table th {
     border-bottom: 1px solid #D3D3D3;
 }
 
-table tr:hover td {
-    background-color: #636EFA;
+.landingtable tr:hover  td, .landingtable tr:hover th{
+    background-color: #3f4952;
 }
 
 table td {
@@ -44,7 +44,7 @@ caption {
 }
 
 .nav-bar-element:hover {
-    color: #636EFA;
+    color: #3f4952;
 }
 
 .navbar-brand {
@@ -52,5 +52,5 @@ caption {
 }
 
 .navbar-brand:hover {
-    color: #636EFA !important;
+    color: #3f4952 !important;
 }
