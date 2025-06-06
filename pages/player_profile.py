@@ -17,7 +17,7 @@ def layout(**kwargs):
     return html.Div([
         get_nav_bar(),
         html.Div([
-            'Player:',
+            'Player',
             dcc.Dropdown(
                 placeholder="Select a player",
                 options=all_players,
@@ -26,10 +26,10 @@ def layout(**kwargs):
                 value=player,
                 style={"color": "#000000"})
             ],
-            style={"width": "250px", "color":"#fff", "margin-left": "auto", "padding-right": "20px"}
+            style={"width": "250px", "margin-left": "auto"}
         ),
         html.Div(id='player-profile-pane'),
-        html.Div(id='player-progression-graph')
+        html.Div(id='player-progression-graph'), 
     ])
 
 
@@ -53,8 +53,8 @@ def update_player_profile(player, season):
             html.Td('%.3f'%(all_time_stats.obp())),
             html.Td('%.3f'%(all_time_stats.slg()))
         ])
-    ],
-    style={"font-size": "large"}
+    ], 
+    style={"font-size": "medium"}
     )
 
     batting_table = html.Table([
@@ -67,7 +67,9 @@ def update_player_profile(player, season):
             html.Td(all_time_stats.triples),
             html.Td(all_time_stats.home_runs)
         ])
-    ])
+    ], 
+    style={"font-size": "medium"}
+    )
 
     misc_table = html.Table([
         html.Tr([html.Th(col) for col in ['GP', 'AB', 'PA', 'BB', 'SF', 'K']]),
@@ -79,13 +81,16 @@ def update_player_profile(player, season):
             html.Td(all_time_stats.sac_flies),
             html.Td(all_time_stats.strikeouts)
         ])
-    ])
+    ], 
+    style={"font-size": "medium"}
+    )
 
     main_player_stats_table = html.Table([
         html.Tr(avg_table),
         html.Tr(batting_table),
         html.Tr(misc_table)
-    ])
+    ], 
+    style={"font-size": "medium"})
 
     if season == "All":
         header = f"{player} – Career"
@@ -98,10 +103,10 @@ def update_player_profile(player, season):
             html.Tr(html.Td(html.Img(src="../assets/pic.png", alt='image'))),
             html.Tr(html.Td(main_player_stats_table))
         ])
-    ])
+    ],
+    style={"font-size": "x-large"})
     layout.append(main_profile_pane)
     return layout
-
 
 @callback(
     Output(component_id='player-progression-graph', component_property='children'),
@@ -116,7 +121,10 @@ def update_player_progression_graph(player):
         html.Table([
             html.Tr(html.Th(header))
         ])
-    ])
+    ],
+    style={"font-size": "x-large"}
+    )
+
 
     rolling_cumulative = db.get_all_rolling_cumulative_stats_for_player(player)
     
@@ -135,6 +143,11 @@ def update_player_progression_graph(player):
     df_seasons = pd.DataFrame(season_stats, columns=["Season", "AVG", "SLG"])
     
     linefig_batting_avg = px.line(df_seasons, x ="Season", y =["AVG", "SLG"], title=f'AVG & SLG by Season', markers=True)
+    linefig_batting_avg.update_layout(
+        template="plotly_dark", 
+        paper_bgcolor="#000000", 
+        plot_bgcolor="#000000"
+    )
     linefig_batting_avg.update_xaxes(type='category')
 
     # Make progression figures - all seasons
@@ -148,7 +161,10 @@ def update_player_progression_graph(player):
     linefig_moving_avg.update_layout(
         yaxis_range=[0, 1],
         legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='rgba(0,0,0,0)', bordercolor='rgba(0,0,0,0)'),
-        margin=dict(t=120)
+        margin=dict(t=120),
+        template="plotly_dark", 
+        paper_bgcolor="#000000",
+        plot_bgcolor="#000000"
     )
 
     linefig_moving_slg = px.line(
@@ -160,7 +176,10 @@ def update_player_progression_graph(player):
     linefig_moving_slg.update_xaxes(type='category')
     linefig_moving_slg.update_layout(
         legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='rgba(0,0,0,0)', bordercolor='rgba(0,0,0,0)'),
-        margin=dict(t=120)
+        margin=dict(t=120),
+        template="plotly_dark", 
+        paper_bgcolor="#000000",
+        plot_bgcolor="#000000"
     )
 
     layout.append(career_graphs_pane)
@@ -171,8 +190,3 @@ def update_player_progression_graph(player):
     ]))
 
     return html.Div(layout)
-
-
-
-
-

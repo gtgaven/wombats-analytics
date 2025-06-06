@@ -15,7 +15,6 @@ layout = html.Div([
     html.Div(id='stats-summary')
 ])
 
-
 @callback(
     Output(component_id='stats-summary', component_property='children'),
     Input(component_id='season-select', component_property='value')
@@ -25,11 +24,11 @@ def update_stats_summary(season):
         return
 
     if season == "All":
-        team_header = "Team - All Time"
-        player_header = "Players - All Time"
+        team_header = "Team – All Time"
+        player_header = "Players – All Time"
     else:
-        team_header = f'Team - {season} Season'
-        player_header = f'Players - {season} Season'
+        team_header = f'Team – {season} Season'
+        player_header = f'Players – {season} Season'
 
     stats = dict()
     for i in ['Cumulative', 'Median Wombat', 'Mean Wombat']:
@@ -89,7 +88,8 @@ def update_stats_summary(season):
             html.Td(rf_home),
             html.Td(ra_home),
             html.Td(rf_home - ra_home),
-        ]),
+        ]
+        ),
         html.Tr([
             html.Td("Away"),
             html.Td(gp_away),
@@ -99,7 +99,8 @@ def update_stats_summary(season):
             html.Td(rf_away),
             html.Td(ra_away),
             html.Td(rf_away - ra_away),
-        ]),
+        ]
+        ),
         html.Tr([
             html.Td("All"),
             html.Td(gp_any),
@@ -109,8 +110,9 @@ def update_stats_summary(season):
             html.Td(rf_any),
             html.Td(ra_any),
             html.Td(rf_any - ra_any),
-        ]),
-    ])
+        ]
+        ),
+    ], className="landingtable")
 
     layout = [
         html.H3(team_header),
@@ -119,15 +121,15 @@ def update_stats_summary(season):
         html.Table([
             html.Tr([html.Th(col) for col in ['', 'AVG', 'OBP', 'SLG']]),
             *[stats_avg_row(i) for i in stats.keys()]
-        ]),
+        ], className="landingtable"),
         html.Table([
-            html.Tr([html.Th(col) for col in ['', 'H', 'R', '1B', '2B', '3B', 'HR']]) ,
+            html.Tr([html.Th(col) for col in ['', 'H', 'R', '1B', '2B', '3B', 'HR']]),
             *[stats_batting_row(i) for i in stats.keys()]
-        ]),   
+        ], className="landingtable"),
         html.Table([
             html.Tr([html.Th(col) for col in ['', 'GP', 'AB', 'PA', 'BB', 'SF', 'K']]),
             *[stats_misc_row(i) for i in stats.keys()]
-        ])
+        ], className="landingtable")
     ]
 
     return layout

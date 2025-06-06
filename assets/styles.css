@@ -1,7 +1,11 @@
+h3 {
+    color: #D3D3D3;
+}
+
 table {
     border-collapse: collapse;
     width: 100%;
-    font-family: Calibri;
+    font-family: sans-serif;
     font-size: 20px;
     text-align: center;
     overflow: hidden;
@@ -9,29 +13,48 @@ table {
     margin: auto;
     margin-top: 25px;
     margin-bottom: 25px;
+    background-color: #000000;
+    color: #D3D3D3;
 } 
 
 table th {
-    background-color: #696969;
-    color: #fff;
     padding: 5px;
     letter-spacing: 1px;
-    border-top: 1px solid #fff;
-    border-bottom: 1px solid #ccc;
+    border-top: 1px solid #D3D3D3;
+    border-bottom: 1px solid #D3D3D3;
 }
 
-table tr:hover td {
-    background-color: #cacaca;
+.landingtable tr:hover  td, .landingtable tr:hover th{
+    background-color: #3f4952;
 }
 
 table td {
-    background-color: #fff;
     padding: 5px;
-    border-bottom: 1px solid #ccc;
 }
 
 caption {
     margin-bottom: 1em;
     font-size: 1em;
     text-align: center;
+}
+
+.nav-bar-element {
+    margin: auto;
+    padding: 10px;
+    color: #D3D3D3;
+    font-family: sans-serif;
+    background-color: #000000;
+    text-decoration: none;
+}
+
+.nav-bar-element:hover {
+    color: #3f4952;
+}
+
+.navbar-brand {
+    color: #D3D3D3; 
+}
+
+.navbar-brand:hover {
+    color: #3f4952 !important;
 }
