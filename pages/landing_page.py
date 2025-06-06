@@ -115,9 +115,9 @@ def update_stats_summary(season):
     ], className="landingtable")
 
     layout = [
-        html.H3(team_header, style={"color": "#D3D3D3"}),
+        html.H3(team_header),
         team_stats_table,
-        html.H3(player_header, style={"color": "#D3D3D3"}),
+        html.H3(player_header),
         html.Table([
             html.Tr([html.Th(col) for col in ['', 'AVG', 'OBP', 'SLG']]),
             *[stats_avg_row(i) for i in stats.keys()]
