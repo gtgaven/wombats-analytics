@@ -1,5 +1,5 @@
 import dash
-from dash import html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, State, callback
 import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
@@ -29,7 +29,7 @@ def layout(**kwargs):
             style={"width": "250px", "margin-left": "auto"}
         ),
         html.Div(id='player-profile-pane'),
-        html.Div(id='player-progression-graph'), 
+        html.Div(id='player-progression-graphs'), 
     ])
 
 
@@ -109,10 +109,10 @@ def update_player_profile(player, season):
     return layout
 
 @callback(
-    Output(component_id='player-progression-graph', component_property='children'),
+    Output(component_id='player-progression-graphs', component_property='children'),
     Input(component_id='player-profile-select', component_property='value')
 )
-def update_player_progression_graph(player):
+def update_player_progression_graphs(player):
     if not player:
         return 
     layout = []
@@ -131,24 +131,27 @@ def update_player_progression_graph(player):
     game_stats = []
     season_stats = []
     for season, playerstats in rolling_cumulative.items():
-        game_stats.extend([[season, p.games_played, p.avg(), p.slg()] for p in playerstats])
+        game_stats.extend([[season, p.games_played, p.avg(), p.slg(), p.hits()] for p in playerstats])
         # last PlayerStats of each season are the season-cumulative
         season_stats.append([season,
                              playerstats[len(playerstats) - 1].avg(),
                              playerstats[len(playerstats) - 1].slg()])
-
     
-    
-    df_games = pd.DataFrame(game_stats, columns=["Season", "Games Played", "AVG", "SLG"])
+    df_games = pd.DataFrame(game_stats, columns=["Season", "Games Played", "AVG", "SLG", "Hits"])
     df_seasons = pd.DataFrame(season_stats, columns=["Season", "AVG", "SLG"])
     
-    linefig_batting_avg = px.line(df_seasons, x ="Season", y =["AVG", "SLG"], title=f'AVG & SLG by Season', markers=True)
-    linefig_batting_avg.update_layout(
+    linefig_seasonal_avgs = px.line(df_seasons, x ="Season", y =["AVG", "SLG"], title=f'AVG & SLG by Season', markers=True)
+    linefig_seasonal_avgs.update_layout(
         template="plotly_dark", 
         paper_bgcolor="#000000", 
-        plot_bgcolor="#000000"
+        plot_bgcolor="#000000",
+        yaxis_title="AVG & SLG",
+        legend=dict(
+            x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', 
+            bgcolor='#000000', bordercolor='#000000', title=None),
+        margin=dict(t=120)
     )
-    linefig_batting_avg.update_xaxes(type='category')
+    linefig_seasonal_avgs.update_xaxes(type='category')
 
     # Make progression figures - all seasons
     linefig_moving_avg = px.line(
@@ -159,8 +162,10 @@ def update_player_progression_graph(player):
     ) 
     linefig_moving_avg.update_xaxes(type='category')
     linefig_moving_avg.update_layout(
-        yaxis_range=[0, 1],
-        legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='rgba(0,0,0,0)', bordercolor='rgba(0,0,0,0)'),
+        yaxis_range=[0,1],
+        legend=dict(
+            x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', 
+            bgcolor='#000000', bordercolor='#000000'),
         margin=dict(t=120),
         template="plotly_dark", 
         paper_bgcolor="#000000",
@@ -175,7 +180,22 @@ def update_player_progression_graph(player):
     ) 
     linefig_moving_slg.update_xaxes(type='category')
     linefig_moving_slg.update_layout(
-        legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='rgba(0,0,0,0)', bordercolor='rgba(0,0,0,0)'),
+        legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='#000000', bordercolor='rgba(0,0,0,0)'),
+        margin=dict(t=120),
+        template="plotly_dark", 
+        paper_bgcolor="#000000",
+        plot_bgcolor="#000000"
+    )
+
+    linefig_moving_hits = px.line(
+        df_games,
+        x="Games Played", y="Hits", color="Season",
+        title=f'Cumulative Hits by Game',
+        markers=True
+    ) 
+    linefig_moving_hits.update_xaxes(type='category')
+    linefig_moving_hits.update_layout(
+        legend=dict(x=0.008, y=1.05, xanchor='left', yanchor='bottom', orientation='h', bgcolor='#000000', bordercolor='rgba(0,0,0,0)'),
         margin=dict(t=120),
         template="plotly_dark", 
         paper_bgcolor="#000000",
@@ -184,9 +204,10 @@ def update_player_progression_graph(player):
 
     layout.append(career_graphs_pane)
     layout.append(html.Div([
-    dcc.Graph(figure=linefig_batting_avg), 
+    dcc.Graph(figure=linefig_seasonal_avgs), 
     dcc.Graph(figure=linefig_moving_avg),
-    dcc.Graph(figure=linefig_moving_slg)
+    dcc.Graph(figure=linefig_moving_slg),
+    dcc.Graph(figure=linefig_moving_hits)
     ]))
 
     return html.Div(layout)
