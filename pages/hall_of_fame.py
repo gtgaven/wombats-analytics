@@ -10,8 +10,11 @@ from frontend_common import get_nav_bar, db
 
 dash.register_page(__name__, path='/hall-of-fame')
 
+seasons = db.get_seasons()
+most_recent_season = seasons[len(seasons)-1]
+
 layout = html.Div([
-    get_nav_bar(),
+    get_nav_bar(most_recent_season),
     html.Div(id='hof-graphs')
 ])
 

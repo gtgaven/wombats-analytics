@@ -76,7 +76,7 @@ ROSTERS = {
     #         "Zach"
     #     ]
     "2025":[
-        "Lamo B",
+        "Matt J",
         "Deep B",
         "Keith B",
         "Justin G",
