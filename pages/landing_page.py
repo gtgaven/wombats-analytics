@@ -74,17 +74,26 @@ def update_stats_summary(season):
     w_away = db.get_wins_in_year(season, False)
     w_any = w_home + w_away
 
+    ties_home = db.get_ties_in_year(season, True)
+    ties_away = db.get_ties_in_year(season, False)
+    ties_any = ties_home + ties_away
+
+    losses_home = gp_home - w_home - ties_home
+    losses_away = gp_away - w_away - ties_away
+    losses_any = gp_any - w_any - ties_any
+
     if rf_any != stats["Cumulative"].runs:
        raise RuntimeError("sanity validation failed for runs-for calculation")
 
     team_stats_table = html.Table([
-        html.Tr([html.Th(i) for i in ["", "GP", "W", "L", "%", "RF", "RA", "Diff"]]),
+        html.Tr([html.Th(i) for i in ["", "GP", "W", "L", "T", "%", "RF", "RA", "Diff"]]),
         html.Tr([
             html.Td("Home"),
             html.Td(gp_home),
             html.Td(w_home),
-            html.Td(gp_home - w_home),
-            html.Td('%.3f'%(w_home / gp_home)),
+            html.Td(losses_home),
+            html.Td(ties_home),
+            html.Td('%.3f'%(w_home / (w_home + losses_home))),
             html.Td(rf_home),
             html.Td(ra_home),
             html.Td(rf_home - ra_home),
@@ -94,8 +103,9 @@ def update_stats_summary(season):
             html.Td("Away"),
             html.Td(gp_away),
             html.Td(w_away),
-            html.Td(gp_away - w_away),
-            html.Td('%.3f'%(w_away / gp_away)),
+            html.Td(losses_away),
+            html.Td(ties_away),
+            html.Td('%.3f'%(w_away / (w_away + losses_away))),
             html.Td(rf_away),
             html.Td(ra_away),
             html.Td(rf_away - ra_away),
@@ -105,8 +115,9 @@ def update_stats_summary(season):
             html.Td("All"),
             html.Td(gp_any),
             html.Td(w_any),
-            html.Td(gp_any - w_any),
-            html.Td('%.3f'%(w_any / gp_any)),
+            html.Td(losses_any),
+            html.Td(ties_any),
+            html.Td('%.3f'%(w_any / (w_any + losses_any))),
             html.Td(rf_any),
             html.Td(ra_any),
             html.Td(rf_any - ra_any),

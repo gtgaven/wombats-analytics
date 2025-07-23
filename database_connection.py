@@ -216,6 +216,24 @@ class DbConnection():
 
         return count[0][0]
 
+    def get_ties_in_year(self, year: int | str, home: bool | str):
+        if year == "All":
+            if home == "Any":
+                count = self._execute_query(f'SELECT COUNT(id) FROM game WHERE score = opponentscore;')
+            elif home:
+                count = self._execute_query(f'SELECT COUNT(id) FROM game WHERE score = opponentscore AND washome=1;')
+            else:
+                count = self._execute_query(f'SELECT COUNT(id) FROM game WHERE score = opponentscore AND washome=0;')
+        else:
+            if home == "Any":
+                count = self._execute_query(f'SELECT COUNT(id) FROM game WHERE score = opponentscore AND year={year};')
+            elif home:
+                count = self._execute_query(f'SELECT COUNT(id) FROM game WHERE score = opponentscore AND year={year} AND washome=1;')
+            else:
+                count = self._execute_query(f'SELECT COUNT(id) FROM game WHERE score = opponentscore AND year={year} AND washome=0;')
+
+        return count[0][0]
+
     def get_runs_in_year(self, own: bool, year: int | str, home: bool | str):
         if own:
             table_field = "score"
