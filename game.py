@@ -97,6 +97,23 @@ ROSTERS = {
         "Eloisa D",
         "Nick K",
         "Greg G"
+    ],
+    "2026":[
+        "Deep B",
+        "Keith B",
+        "Serena D",
+        "Grey D",
+        "Xavier D",
+        "Justin G",
+        "Ken H",
+        "Dave L",
+        "A P",
+        "Fahad S",
+        "Taylor S",
+        "Ryan W",
+        "John W",
+        "Ian W",
+        "Greg G"
     ]
 }
 

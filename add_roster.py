@@ -75,29 +75,46 @@ ROSTERS = {
     #         "Ted",
     #         "Zach"
     #     ]
-    "2025":[
-        "Matt J",
+    # "2025":[
+    #     "Matt J",
+    #     "Deep B",
+    #     "Keith B",
+    #     "Justin G",
+    #     "Shane H",
+    #     "Ken H",
+    #     "Frances K",
+    #     "Adam P",
+    #     "Ted S",
+    #     "Ron S",
+    #     "Fahad S",
+    #     "Taylor S",
+    #     "Ian W",
+    #     "Grey D",
+    #     "Eloisa D",
+    #     "Nick K",
+    #     "Greg G"
+    # ]
+    "2026":[
         "Deep B",
         "Keith B",
+        "Serena D",
+        "Grey D",
+        "Xavier D",
         "Justin G",
-        "Shane H",
         "Ken H",
-        "Frances K",
-        "Adam P",
-        "Ted S",
-        "Ron S",
+        "Dave L",
+        "A P",
         "Fahad S",
         "Taylor S",
+        "Ryan W",
+        "John W",
         "Ian W",
-        "Grey D",
-        "Eloisa D",
-        "Nick K",
         "Greg G"
     ]
 }
 
 def add_roster(year):
-    db = DbConnection(False)#change to true if running for real
+    db = DbConnection(True)#change to true if running for real
     db.verify_players_exist_in_database(ROSTERS[str(year)])
     for p in ROSTERS[str(year)]:
         print(f'adding {p} to {year} roster')
@@ -105,7 +122,7 @@ def add_roster(year):
 
 
 def add_new_player(player_name):
-    db = DbConnection(False)#change to true if running for real
+    db = DbConnection(True)#change to true if running for real
     db.insert_player(player_name)
 
 if __name__ == '__main__':
@@ -116,13 +133,14 @@ if __name__ == '__main__':
     #for p in ["Fahad", "Jack", "James", "Justin", "Keith", "Lamo", "Michael"]:
         #add_new_player(p)
 
-    # for p in ["Grey D",
-    #     "Eloisa D",
-    #     "Nick K",
-    #     "Taylor S",
-    #     "Ken H",
-    #     "Frances K",
-    #     "Adam P",
-    #     "Deep B"]:
-    #     add_new_player(p)
-    add_roster(2025)
+    for p in ["Serena D",
+        "Xavier D",
+        "Dave L",
+        "A P",
+        "Ryan W",
+        "John W"]:
+        add_new_player(p)
+
+    
+
+    add_roster(2026)
